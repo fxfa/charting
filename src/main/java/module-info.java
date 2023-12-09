@@ -13,4 +13,6 @@ module charting {
     opens charting.gui.superchart.indicatorspane to javafx.fxml;
     exports charting.gui.superchart to javafx.graphics;
     opens charting.gui.superchart to javafx.fxml;
+    exports charting.gui to javafx.graphics;
+    opens charting.gui to javafx.fxml;
 }
