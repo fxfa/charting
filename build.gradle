@@ -23,3 +23,8 @@ javafx {
     version = "21.0.1"
     modules = ['javafx.controls', 'javafx.fxml']
 }
+
+application {
+    mainModule = 'charting'
+    mainClass = 'charting.Main'
+}
