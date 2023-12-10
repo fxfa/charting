@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml">
+    <HBox fx:id="header" alignment="CENTER_LEFT" styleClass="indicators-pane-header">
+        <Label text="Indicators" styleClass="indicators-pane-title"/>
+
+        <Region HBox.hgrow="SOMETIMES"/>
+
+        <Button text="Close" onAction="#onCloseButtonClick" styleClass="indicators-pane-close-button"/>
+    </HBox>
+
+    <Separator styleClass="indicators-pane-header-separator"/>
+
+    <ListView fx:id="listView" styleClass="indicators-pane-list"/>
+</VBox>
