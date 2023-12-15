@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import charting.gui.superchart.ValueAxis?>
+<fx:root type="ValueAxis" xmlns:fx="http://javafx.com/fxml" styleClass="value-axis" prefWidth="72" prefHeight="800">
+</fx:root>

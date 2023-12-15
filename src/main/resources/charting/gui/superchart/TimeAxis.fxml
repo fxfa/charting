@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import charting.gui.superchart.TimeAxis?>
+<fx:root type="TimeAxis" xmlns:fx="http://javafx.com/fxml" styleClass="time-axis" prefWidth="1200" prefHeight="42">
+</fx:root>

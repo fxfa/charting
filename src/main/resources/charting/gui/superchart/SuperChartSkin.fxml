@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import charting.gui.chart.Chart?>
+<?import charting.gui.superchart.indicatorspane.IndicatorsPane?>
+<?import charting.gui.superchart.TimeAxis?>
+<?import charting.gui.superchart.ValueAxis?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
+<StackPane xmlns:fx="http://javafx.com/fxml">
+    <HBox>
+        <VBox fx:id="objectToolbar" styleClass="object-toolbar">
+            <Button fx:id="trendLineButton" text="Trend line" maxWidth="Infinity"
+                    prefWidth="74" prefHeight="74" alignment="CENTER"
+                    styleClass="object-toolbar-button, object-toolbar-trend-line-button"
+                    onAction="#onTrendLineButtonAction">
+                <graphic>
+                    <SVGPath styleClass="object-toolbar-button-icon" stroke="#cccccc" fill="transparent" strokeWidth="2"
+                             content="M 4 0 a 4 4 90 0 1 4 4 a 4 4 90 0 1 -4 4 a 4 4 90 0 1 -4 -4 a 4 4 90 0 1 4 -4 z
+                             M 6.828 6.828 L 33.172 33.172 z M 36 32 a 4 4 90 0 1 4 4 a 4 4 90 0 1 -4 4
+                             a 4 4 90 0 1 -4 -4 a 4 4 90 0 1 4 -4 z"/>
+                </graphic>
+            </Button>
+
+            <Button fx:id="horizontalLineButton" text="Horizontal line" maxWidth="Infinity"
+                    prefWidth="74" prefHeight="74" alignment="CENTER"
+                    styleClass="object-toolbar-button, object-toolbar-horizontal-line-button"
+                    onAction="#onHorizontalLineButtonAction">
+                <graphic>
+                    <SVGPath styleClass="object-toolbar-button-icon" stroke="#cccccc" fill="transparent" strokeWidth="2"
+                             content="M 0 20 L 16 20 z M 20 16 a 4 4 90 0 1 4 4 a 4 4 90 0 1 -4 4
+                             a 4 4 90 0 1 -4 -4 a 4 4 90 0 1 4 -4 z M 24 20 L 40 20 z"/>
+                </graphic>
+            </Button>
+            <Button fx:id="measureAreaButton" text="Measure area" maxWidth="Infinity"
+                    prefWidth="74" prefHeight="74" alignment="CENTER"
+                    styleClass="object-toolbar-button, object-toolbar-measure-area-button"
+                    onAction="#onMeasureAreaButtonAction">
+                <graphic>
+                    <SVGPath styleClass="object-toolbar-button-icon" stroke="#cccccc" fill="transparent" strokeWidth="2"
+                             content="M 0 0 L 40 0 L 40 40 L 0 40 z M 4 20 L 36 20 z m 32 0 l -5 -5 z l -5 5 z
+                             M 20 36 l 0 -32 z m 0 -32 l -5 5 z l 5 5"/>
+                </graphic>
+            </Button>
+            <Button fx:id="indicatorButton" text="Indicators" maxWidth="Infinity"
+                    prefWidth="74" prefHeight="74" alignment="CENTER"
+                    styleClass="object-toolbar-button, object-toolbar-indicator-button"
+                    onAction="#onIndicatorButtonAction">
+                <graphic>
+                    <SVGPath styleClass="object-toolbar-button-icon" stroke="#cccccc" fill="transparent" strokeWidth="2"
+                             content="M 5 12 L 15 7 L 25 12 L 35 0 M 31 20 h 8 c 0.55 0 1 0.45 1 1 V 39
+                             C 40 39.55 39.55 40 39 40 h -8 c -0.55 0 -1 -0.45 -1 -1 V 21 c 0 -0.55 0.45 -1 1 -1 z
+                             M 21 32 h 8 c 0.55 0 1 0.45 1 1 v 6 C 30 39.55 29.55 40 29 40 h -8
+                             C 20.45 40 20 39.55 20 39 v -6 c 0 -0.55 0.45 -1 1 -1 z M 11 27 h 8 c 0.55 0 1 0.45 1 1
+                             V 39 C 20 39.55 19.55 40 19 40 h -8 c -0.55 0 -1 -0.45 -1 -1 V 28 c 0 -0.55 0.45 -1 1 -1 z
+                             M 1 32 H 9 c 0.55 0 1 0.45 1 1 v 6 C 10 39.55 9.55 40 9 40 H 9 C 0.45 40 0 39.55 0 39 v -6
+                             c 0 -0.55 0.45 -1 1 -1 z"/>
+                </graphic>
+            </Button>
+        </VBox>
+
+        <Separator styleClass="object-toolbar-separator" orientation="VERTICAL"/>
+
+        <GridPane HBox.hgrow="ALWAYS">
+            <Chart fx:id="chart" VBox.vgrow="ALWAYS" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                   GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS"/>
+            <ValueAxis fx:id="valueAxis" GridPane.vgrow="ALWAYS" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <TimeAxis fx:id="timeAxis" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <Region styleClass="chart-axis-corner" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        </GridPane>
+    </HBox>
+
+    <Pane pickOnBounds="false" prefHeight="0" prefWidth="0">
+        <IndicatorsPane fx:id="indicatorsPane" managed="false" visible="false"/>
+    </Pane>
+</StackPane>
