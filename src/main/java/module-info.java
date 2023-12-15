@@ -1,6 +1,7 @@
 module charting {
     requires javafx.controls;
     requires javafx.fxml;
+    requires com.opencsv;
 
     exports charting.gui.util to javafx.graphics;
     opens charting.gui.util to javafx.fxml;
