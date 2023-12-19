@@ -1,0 +1,92 @@
+.super-chart {
+    -fx-background-color: #050b1c;
+    -fx-watermark-color: #ffffff12;
+}
+
+.object-toolbar {
+    -fx-background-color: transparent;
+    -fx-spacing: 5px;
+    -fx-padding: 5px;
+}
+
+.object-toolbar-button {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-background-radius: 5px;
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-content-display: graphic-only;
+}
+
+.object-toolbar-button:hover {
+    -fx-background-color: #ffffff12
+}
+
+.object-toolbar-button:active {
+    -fx-background-color: #171dd4
+}
+
+.object-toolbar-separator .line {
+    -fx-border-style: solid;
+    -fx-border-width: 0 5 0 0;
+    -fx-border-color: #ffffff10;
+}
+
+.chart {
+    -fx-cursor: crosshair;
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+
+.chart-legend {
+    -fx-padding: 5px;
+}
+
+.chart-legend-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 1.65em;
+    -fx-padding: 5px;
+    -fx-text-fill: white;
+}
+
+.chart-legend-entry {
+    -fx-padding: 5px;
+}
+
+.chart-legend-entry .text {
+    -fx-font-size: 1.35em;
+}
+
+.chart-legend-entry .description {
+    -fx-fill: white;
+}
+
+.value-axis {
+    -fx-border-style: solid;
+    -fx-border-color: #777777;
+    -fx-border-width: 0 0 0 1;
+    -fx-cursor-mark-background-color: derive(#050b1c, 40%);
+    -fx-mark-color: white;
+}
+
+.value-axis:hover {
+    -fx-cursor: v-resize;
+}
+
+.time-axis {
+    -fx-border-style: solid;
+    -fx-border-color: #777777;
+    -fx-border-width: 1 0 0 0;
+    -fx-cursor-mark-background-color: derive(#050b1c, 40%);
+    -fx-mark-color: white;
+}
+
+.time-axis:hover {
+    -fx-cursor: h-resize;
+}
+
+.chart-axis-corner {
+    -fx-border-style: solid;
+    -fx-border-color: #777777;
+    -fx-border-width: 1 0 0 1;
+}
