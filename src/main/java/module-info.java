@@ -7,4 +7,6 @@ module charting {
     opens charting.gui.util to javafx.fxml;
     exports charting.gui.chart to javafx.graphics;
     opens charting.gui.chart to javafx.fxml;
+    exports charting.gui.drawings to javafx.graphics;
+    opens charting.gui.drawings to javafx.fxml;
 }
