@@ -37,8 +37,6 @@ public class IndicatorsPaneSkin extends SkinBase<IndicatorsPane> {
     public IndicatorsPaneSkin(IndicatorsPane indicatorsPane) {
         super(indicatorsPane);
 
-        consumeMouseEvents(false);
-
         root = NodeLoader.loadNew(this);
 
         listView.setItems(indicatorsPane.getIndicators());
