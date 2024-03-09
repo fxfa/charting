@@ -3,6 +3,7 @@ package charting.gui.chart;
 import charting.gui.util.NodeDragDistance;
 import charting.gui.util.NodeRenderingState;
 import javafx.animation.AnimationTimer;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -34,19 +35,17 @@ public class ChartSkin extends SkinBase<Chart> {
 
     private final NodeDragDistance dragDistance;
 
-    private double mouseX;
-    private double mouseY;
+    private double mouseX = Double.NaN;
+    private double mouseY = Double.NaN;
 
-    private final EventHandler<MouseEvent> mouseEventHandler = this::onMouseEvent;
-    private final EventHandler<ScrollEvent> scrollEventHandler = this::onScroll;
+    private final EventHandler<MouseEvent> mouseEventFilter = this::onMouseEvent;
+    private final EventHandler<ScrollEvent> scrollEventFilter = this::onScroll;
 
     private final ChangeListener<Bounds> viewportMousePositionChangeListener =
             (obs, oldVal, newVal) -> onViewportMousePositionChange();
 
     public ChartSkin(Chart chart) {
         super(chart);
-
-        consumeMouseEvents(false);
 
         chartCanvas.widthProperty().bind(chart.widthProperty());
         chartCanvas.heightProperty().bind(chart.heightProperty());
@@ -64,8 +63,8 @@ public class ChartSkin extends SkinBase<Chart> {
         dragDistance.dragDistanceYProperty().addListener((obs, oldVal, newVal) -> chart.shiftDrawings(
                 0, toViewportHeight(newVal.doubleValue() - oldVal.doubleValue())));
 
-        chart.addEventHandler(MouseEvent.ANY, mouseEventHandler);
-        chart.addEventHandler(ScrollEvent.SCROLL, scrollEventHandler);
+        chart.addEventFilter(MouseEvent.ANY, mouseEventFilter);
+        chart.addEventFilter(ScrollEvent.SCROLL, scrollEventFilter);
 
         chart.viewportProperty().addListener(viewportMousePositionChangeListener);
 
@@ -129,6 +128,11 @@ public class ChartSkin extends SkinBase<Chart> {
 
         double x = toViewportX(mouseX);
         double y = toViewportY(mouseY);
+
+        if (!getSkinnable().legendXProperty().isBound()) {
+            getSkinnable().setLegendX(x);
+        }
+
         for (Drawing d : getSkinnable().getDrawings()) {
             if (d instanceof MouseEventDrawing m) {
                 m.onMousePositionChange(x, y, mouseX, mouseY);
@@ -160,7 +164,15 @@ public class ChartSkin extends SkinBase<Chart> {
     }
 
     private void updateLegend() {
-        chartLegend.update(getSkinnable().getDrawings(), toViewportX(mouseX));
+        chartLegend.update(getSkinnable().getDrawings(), getSkinnable().getLegendX());
+    }
+
+    public Bounds getCanvasBounds() {
+        return chartCanvas.getBoundsInLocal();
+    }
+
+    public ReadOnlyObjectProperty<Bounds> canvasBoundsProperty() {
+        return chartCanvas.boundsInLocalProperty();
     }
 
     public double toViewportX(double canvasX) {
@@ -214,8 +226,8 @@ public class ChartSkin extends SkinBase<Chart> {
         dragDistance.dispose();
         renderingState.dispose();
 
-        getSkinnable().removeEventHandler(MouseEvent.ANY, mouseEventHandler);
-        getSkinnable().removeEventHandler(ScrollEvent.SCROLL, scrollEventHandler);
+        getSkinnable().removeEventHandler(MouseEvent.ANY, mouseEventFilter);
+        getSkinnable().removeEventHandler(ScrollEvent.SCROLL, scrollEventFilter);
 
         getSkinnable().viewportProperty().removeListener(viewportMousePositionChangeListener);
 

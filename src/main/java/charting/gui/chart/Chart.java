@@ -22,6 +22,8 @@ public class Chart extends Control {
     private final DoubleProperty zoomPerScrollTickX = new SimpleDoubleProperty(1.05);
     private final DoubleProperty zoomPerScrollTickY = new SimpleDoubleProperty(1.05);
 
+    private final DoubleProperty legendX = new SimpleDoubleProperty(Double.NaN);
+
     public Chart(String title) {
         this();
         setTitle(title);
@@ -124,6 +126,21 @@ public class Chart extends Control {
 
     public void setViewport(Bounds viewport) {
         viewportProperty().set(viewport);
+    }
+
+    public double getLegendX() {
+        return legendX.get();
+    }
+
+    /**
+     * Determines for which coordinate the legend should be loaded.
+     */
+    public DoubleProperty legendXProperty() {
+        return legendX;
+    }
+
+    public void setLegendX(double legendX) {
+        this.legendX.set(legendX);
     }
 
     @Override

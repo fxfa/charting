@@ -47,7 +47,7 @@ class ChartLegend extends VBox {
     }
 
     void update(List<? extends Drawing> drawings, double x) {
-        List<List<ChartLegendString>> strings = getLegendEntries(drawings,x);
+        List<List<ChartLegendString>> strings = getLegendEntries(drawings, x);
 
         while (entries.size() > strings.size()) {
             entryBox.getChildren().remove(entries.remove(entries.size() - 1));
