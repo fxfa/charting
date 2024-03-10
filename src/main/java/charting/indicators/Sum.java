@@ -6,7 +6,10 @@ import charting.timeline.Timestamped;
 import charting.util.Preconditions;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Sums up the last n values.
@@ -32,6 +35,23 @@ public final class Sum extends MappedTimeline<Number, Double> {
 
     @Override
     protected Double map(Instant instant, Number number) {
+        if (number == null) {
+            cache.remove(instant);
+
+            for (int i = 0; i < length; i++) {
+                Timestamped<? extends Number> t = getBase().higher(instant);
+
+                if (t == null) {
+                    break;
+                } else {
+                    instant = t.timestamp();
+                    cache.remove(instant);
+                }
+            }
+
+            return null;
+        }
+
         return getSum(instant);
     }
 

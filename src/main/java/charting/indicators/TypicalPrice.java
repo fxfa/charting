@@ -16,6 +16,10 @@ public final class TypicalPrice extends MappedTimeline<Candle, Double> {
 
     @Override
     protected Double map(Instant instant, Candle candle) {
+        if (candle == null) {
+            return null;
+        }
+
         return (candle.getHigh().doubleValue() + candle.getLow().doubleValue() + candle.getClose().doubleValue()) / 3;
     }
 

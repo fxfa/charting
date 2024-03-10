@@ -29,6 +29,11 @@ public final class Ema extends MappedTimeline<Number, Double> {
 
     @Override
     protected Double map(Instant instant, Number number) {
+        if (number == null) {
+            emas.tailMap(getBase().indexOf(instant), true).clear();
+            return null;
+        }
+
         return getEma(indexOf(instant));
     }
 

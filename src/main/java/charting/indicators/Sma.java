@@ -33,6 +33,10 @@ public final class Sma extends MappedTimeline<Double, Double> {
 
     @Override
     protected Double map(Instant instant, Double number) {
+        if (number == null) {
+            return null;
+        }
+
         if (eager) {
             return number / Math.min(length, indexOf(instant) + 1);
         }

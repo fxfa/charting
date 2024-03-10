@@ -23,7 +23,7 @@ public final class BollingerBands extends MappedTimeline<Number, BollingerBands.
     }
 
     /**
-     * @param length The length of the simple moving average.
+     * @param length     The length of the simple moving average.
      * @param deviations The distance of standard deviations between the simple moving average and the upper/lower band.
      */
     public BollingerBands(Timeline<? extends Candle> base, int length, int deviations) {
@@ -39,10 +39,14 @@ public final class BollingerBands extends MappedTimeline<Number, BollingerBands.
 
     @Override
     protected Values map(Instant instant, Number v) {
+        if (v == null) {
+            return null;
+        }
+
         Timestamped<Double> sma = this.sma.get(instant);
 
         if (sma == null) {
-            return null;
+            return new Values(Double.NaN, Double.NaN, Double.NaN);
         }
 
         return new Values(sma.value() + 2 * v.doubleValue(),
