@@ -34,6 +34,8 @@ public final class NodeDragDistance {
     private final ReadOnlyDoubleWrapper dragDistanceY = new ReadOnlyDoubleWrapper(0);
     private final ReadOnlyBooleanWrapper dragging = new ReadOnlyBooleanWrapper(false);
 
+    private boolean consumingEvents = true;
+
     public NodeDragDistance(Node node) {
         this.node = node;
 
@@ -42,35 +44,60 @@ public final class NodeDragDistance {
         node.addEventHandler(MouseEvent.MOUSE_RELEASED, weakMouseReleaseHandler);
     }
 
+    /**
+     * Whether drag events should be consumed or not.
+     * Default value: true
+     */
+    public void setConsumingEvents(boolean consumingEvents) {
+        this.consumingEvents = consumingEvents;
+    }
+
+    public boolean isConsumingEvents() {
+        return consumingEvents;
+    }
+
     private void onMousePress(MouseEvent e) {
         if (e.getButton() == MouseButton.PRIMARY) {
-            mouseDownX = e.getScreenX();
-            mouseDownY = e.getScreenY();
+            startDrag(e);
 
-            dragging.set(true);
+            if (consumingEvents) {
+                e.consume();
+            }
         }
     }
 
     private void onMouseDrag(MouseEvent e) {
         // An event filter might have consumed the preceding mouse press event,
         // therefore we need to check if the dragging property is true.
-        if (e.getButton() == MouseButton.PRIMARY && isDragging()) {
-            updateDragDistance(e);
+        if (e.getButton() == MouseButton.PRIMARY) {
+            if (isDragging()) {
+                updateDragDistance(e);
+
+                if (consumingEvents) {
+                    e.consume();
+                }
+            }
         }
     }
 
     private void onMouseRelease(MouseEvent e) {
-        if (e.getButton() == MouseButton.PRIMARY && isDragging()) {
-            updateDragDistance(e);
+        if (e.getButton() == MouseButton.PRIMARY) {
+            if (isDragging()) {
+                updateDragDistance(e);
+                stopDrag(e);
 
-            lastDragDistanceX += e.getScreenX() - mouseDownX;
-            lastDragDistanceY += e.getScreenY() - mouseDownY;
-
-            mouseDownX = Double.NaN;
-            mouseDownY = Double.NaN;
-
-            dragging.set(false);
+                if (consumingEvents) {
+                    e.consume();
+                }
+            }
         }
+    }
+
+    private void startDrag(MouseEvent e) {
+        mouseDownX = e.getScreenX();
+        mouseDownY = e.getScreenY();
+
+        dragging.set(true);
     }
 
     private void updateDragDistance(MouseEvent e) {
@@ -78,6 +105,16 @@ public final class NodeDragDistance {
             dragDistanceX.set(e.getScreenX() - mouseDownX + lastDragDistanceX);
             dragDistanceY.set(e.getScreenY() - mouseDownY + lastDragDistanceY);
         }
+    }
+
+    private void stopDrag(MouseEvent e) {
+        lastDragDistanceX += e.getScreenX() - mouseDownX;
+        lastDragDistanceY += e.getScreenY() - mouseDownY;
+
+        mouseDownX = Double.NaN;
+        mouseDownY = Double.NaN;
+
+        dragging.set(false);
     }
 
     public void reset() {
