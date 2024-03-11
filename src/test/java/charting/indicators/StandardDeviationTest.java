@@ -33,10 +33,10 @@ class StandardDeviationTest {
         base.put(Instant.EPOCH, 0);
         base.put(Instant.ofEpochSecond(1), 1);
         base.put(Instant.ofEpochSecond(2), 4);
-        base.put(Instant.ofEpochSecond(3), 5);
+        base.put(Instant.ofEpochSecond(3), 6);
 
-        assertTrue(0.8165 - standardDeviation.get(Instant.ofEpochSecond(2)).value() <= 0.01);
-        assertTrue(1.247 - standardDeviation.get(Instant.ofEpochSecond(3)).value() <= 0.01);
+        assertTrue(Math.abs(1.7 - standardDeviation.get(Instant.ofEpochSecond(2)).value()) < 0.01);
+        assertTrue(Math.abs(2.055 - standardDeviation.get(Instant.ofEpochSecond(3)).value()) < 0.01);
     }
 
     @Test
@@ -50,6 +50,6 @@ class StandardDeviationTest {
 
         base.put(Instant.ofEpochSecond(1), 1);
 
-        assertTrue(0.8165 - values.get(Instant.ofEpochSecond(2)) <= 0.01);
+        assertTrue(Math.abs(0.816 - values.get(Instant.ofEpochSecond(2))) < 0.01);
     }
 }

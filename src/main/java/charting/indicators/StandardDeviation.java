@@ -17,6 +17,7 @@ public final class StandardDeviation extends MappedTimeline<Number, Double> {
         this.length = length;
 
         sma = new Sma(base, length);
+        sma.addListener(this::onSmaUpdate);
     }
 
     @Override
@@ -59,6 +60,18 @@ public final class StandardDeviation extends MappedTimeline<Number, Double> {
         for (int i = 0; it.hasNext() && i < length; i++) {
             Timestamped<? extends Number> t = it.next();
             onUpdate(t.timestamp(), map(t.timestamp(), t.value()));
+        }
+    }
+
+    private void onSmaUpdate(Instant instant, Double newValue) {
+        if (!hasListeners()) {
+            return;
+        }
+
+        if (newValue == null) {
+            onUpdate(instant, null);
+        } else {
+            onUpdate(instant, map(instant, getBase().get(instant).value()));
         }
     }
 
