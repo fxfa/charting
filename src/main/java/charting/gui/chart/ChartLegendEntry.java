@@ -15,20 +15,24 @@ class ChartLegendEntry extends TextFlow {
 
         getStyleClass().add("chart-legend-entry");
 
-        content.addListener((obs, oldVal, newVal) -> onContentChange(newVal));
+        content.subscribe(this::onContentChange);
     }
 
-    private void onContentChange(List<ChartLegendString> newVal) {
+    private void onContentChange(List<ChartLegendString> oldVal, List<ChartLegendString> newVal) {
+        if (oldVal != null && oldVal.equals(newVal)) {
+            return;
+        }
+
         getChildren().clear();
 
         for (ChartLegendString s : newVal) {
-            if (!s.getDescription().isEmpty()) {
+            if (s != null && s.getDescription() != null && !s.getDescription().isEmpty()) {
                 Text description = new Text(s.getDescription());
                 description.getStyleClass().addAll("text", "description");
                 getChildren().add(description);
             }
 
-            if (!s.getValue().isEmpty()) {
+            if (s != null && s.getValue() != null && !s.getValue().isEmpty()) {
                 Text value = new Text(s.getValue());
                 value.getStyleClass().addAll("text", "value");
                 value.setFill(s.getColor());

@@ -15,11 +15,15 @@ class ChartLegend extends VBox {
     private final List<ChartLegendEntry> entries = new ArrayList<>();
 
     ChartLegend() {
+        setMinSize(USE_PREF_SIZE, USE_PREF_SIZE);
+
         getStyleClass().add("chart-legend");
         titleLabel.getStyleClass().add("chart-legend-title");
         entryBox.getStyleClass().add("chart-legend-entry-box");
 
         setBackground(null);
+
+        setMouseTransparent(true);
 
         hideTitleLabel();
 
