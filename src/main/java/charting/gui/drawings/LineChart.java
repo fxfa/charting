@@ -95,7 +95,7 @@ public class LineChart implements LegendDrawing {
         Number last = null;
 
         var it = getValues().listIterator(getStartIndex(context));
-        while (it.hasNext() && it.nextIndex() <= getEndIndex(context)) {
+        while (it.nextIndex() < getEndIndex(context)) {
             int i = it.nextIndex();
             Number current = it.next().value();
 
@@ -104,7 +104,7 @@ public class LineChart implements LegendDrawing {
             }
 
             if (!Double.isNaN(last.doubleValue()) && !Double.isNaN(current.doubleValue())) {
-                lines.add(new Line(Math.max(0, i - 1), last.doubleValue(), i, current.doubleValue(),
+                lines.add(new Line(i - 1, last.doubleValue(), i, current.doubleValue(),
                         getColor(), 1.25));
             }
 
@@ -115,10 +115,10 @@ public class LineChart implements LegendDrawing {
     }
 
     private int getStartIndex(DrawingContext c) {
-        return (int) Math.min(Math.max(c.getViewport().getMinX(), 0), getValues().size());
+        return (int) Math.min(Math.max(c.getViewport().startX(), 0), getValues().size());
     }
 
     private int getEndIndex(DrawingContext c) {
-        return (int) (c.getViewport().getMaxX() + 1);
+        return (int) Math.min(c.getViewport().endX() + 2, getValues().size());
     }
 }

@@ -98,24 +98,24 @@ public class VolumeChart implements LegendDrawing {
         double heightSection = context.getViewport().getHeight() * HEIGHT_PERCENTAGE;
 
         var it = getCandleTimeline().listIterator(s);
-        while (it.hasNext() && it.nextIndex() <= e) {
+        while (it.nextIndex() < e) {
             Candle candle = it.next().value();
             double volume = candle.getVolume().doubleValue();
             double barX = it.previousIndex() - 0.5 + (1 - BAR_WIDTH) / 2;
             double height = heightSection * (volume / highestVolume);
 
-            bars.add(new Rect(barX, context.getViewport().getMinY(), BAR_WIDTH, height, getBarColor(candle)));
+            bars.add(new Rect(barX, context.getViewport().startY(), BAR_WIDTH, height, getBarColor(candle)));
         }
 
         return bars;
     }
 
     private int getStartIndex(DrawingContext c) {
-        return (int) Math.min(Math.max(c.getViewport().getMinX(), 0), getCandleTimeline().size());
+        return (int) Math.min(Math.max(c.getViewport().startX(), 0), getCandleTimeline().size());
     }
 
     private int getEndIndex(DrawingContext c) {
-        return (int) (c.getViewport().getMaxX() + 1);
+        return (int) Math.min(c.getViewport().endX() + 2, getCandleTimeline().size());
     }
 
     private double getHighestVolume(int start, int end) {

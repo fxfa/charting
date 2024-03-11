@@ -66,8 +66,8 @@ public class HorizontalLine implements Drawing {
             return Collections.emptyList();
         }
 
-        Line line = new Line(context.getViewport().getMinX(), getY(),
-                context.getViewport().getMaxX(), getY(), getColor());
+        Line line = new Line(context.getViewport().startX(), getY(),
+                context.getViewport().endX(), getY(), getColor());
 
         if (isDashed()) {
             line.setLineDashes(new double[]{1, 2});

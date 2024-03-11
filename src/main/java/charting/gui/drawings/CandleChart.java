@@ -132,7 +132,7 @@ public class CandleChart implements LegendDrawing {
         List<Drawable> drawables = new LinkedList<>();
 
         var it = getCandleTimeline().listIterator(getStartIndex(context));
-        while (it.hasNext() && it.nextIndex() < getEndIndex(context)) {
+        while (it.nextIndex() < getEndIndex(context)) {
             int i = it.nextIndex();
             Candle c = it.next().value();
 
@@ -147,11 +147,11 @@ public class CandleChart implements LegendDrawing {
     }
 
     private int getStartIndex(DrawingContext c) {
-        return (int) Math.min(Math.max(c.getViewport().getMinX(), 0), getCandleTimeline().size());
+        return (int) Math.min(Math.max(c.getViewport().startX(), 0), getCandleTimeline().size());
     }
 
     private int getEndIndex(DrawingContext c) {
-        return (int) (c.getViewport().getMaxX() + 1);
+        return (int) Math.min(c.getViewport().endX() + 2, getCandleTimeline().size());
     }
 
     private Drawable getBody(Candle c, int i) {
