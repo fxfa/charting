@@ -1,8 +1,6 @@
 package charting.indicators;
 
-import charting.data.Candle;
 import charting.timeline.MappedTimeline;
-import charting.timeline.MapperTimeline;
 import charting.timeline.Timeline;
 import charting.timeline.Timestamped;
 import charting.util.Preconditions;
@@ -18,7 +16,7 @@ public final class BollingerBands extends MappedTimeline<Number, BollingerBands.
 
     private final Sma sma;
 
-    public BollingerBands(Timeline<? extends Candle> base) {
+    public BollingerBands(Timeline<? extends Number> base) {
         this(base, 20, 2);
     }
 
@@ -26,15 +24,16 @@ public final class BollingerBands extends MappedTimeline<Number, BollingerBands.
      * @param length     The length of the simple moving average.
      * @param deviations The distance of standard deviations between the simple moving average and the upper/lower band.
      */
-    public BollingerBands(Timeline<? extends Candle> base, int length, int deviations) {
-        super(new StandardDeviation(new MapperTimeline<>(base, Candle::getClose), length));
+    public BollingerBands(Timeline<? extends Number> base, int length, int deviations) {
+        super(new StandardDeviation(base, length));
 
         Preconditions.checkArgument(length > 0);
         Preconditions.checkArgument(deviations > 0);
 
         this.deviations = deviations;
 
-        sma = new Sma(new MapperTimeline<>(base, Candle::getClose), length);
+        sma = new Sma(base, length);
+        sma.addListener(this::onSmaUpdate);
     }
 
     @Override
@@ -60,6 +59,18 @@ public final class BollingerBands extends MappedTimeline<Number, BollingerBands.
         }
 
         onUpdate(instant, map(instant, newBaseValue));
+    }
+
+    private void onSmaUpdate(Instant instant, Double newValue) {
+        if (!hasListeners()) {
+            return;
+        }
+
+        if (newValue == null) {
+            onUpdate(instant, null);
+        } else {
+            onUpdate(instant, map(instant, getBase().get(instant).value()));
+        }
     }
 
     public int getDeviations() {
