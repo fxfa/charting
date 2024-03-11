@@ -181,22 +181,8 @@ public class BarChart implements TimelineDrawing {
 
     @Override
     public Range getYDrawingRange(double startX, double endX) {
-        Preconditions.checkArgument(startX <= endX);
-
-        double minY = Double.NaN;
-        double maxY = Double.NaN;
-
-        if (getValues() != null) {
-            startX = Math.min(Math.max(0, startX), getValues().size());
-
-            var it = getValues().listIterator((int) startX);
-            while (it.hasNext() && it.nextIndex() < endX) {
-                double v = it.next().value().doubleValue();
-                minY = MathUtil.getMinIgnoreNan(minY, v);
-                maxY = MathUtil.getMaxIgnoreNan(maxY, v);
-            }
-        }
-
-        return new Range(minY, maxY);
+        return TimelineDrawing.calculateYDrawingRange(startX, endX, getValues(),
+                (m, v) -> MathUtil.getMinIgnoreNan(m, v.doubleValue()),
+                (m, v) -> MathUtil.getMaxIgnoreNan(m, v.doubleValue()));
     }
 }

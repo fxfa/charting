@@ -6,7 +6,6 @@ import charting.gui.chart.DrawingContext;
 import charting.gui.chart.Polygon;
 import charting.timeline.Timeline;
 import charting.util.MathUtil;
-import charting.util.Preconditions;
 import charting.util.Range;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -115,22 +114,8 @@ public class BandChart implements TimelineDrawing {
 
     @Override
     public Range getYDrawingRange(double startX, double endX) {
-        Preconditions.checkArgument(startX <= endX);
-
-        double minY = Double.NaN;
-        double maxY = Double.NaN;
-
-        if (getValues() != null) {
-            startX = Math.min(Math.max(0, startX), getValues().size());
-
-            var it = getValues().listIterator((int) startX);
-            while (it.hasNext() && it.nextIndex() < endX) {
-                Range r = it.next().value();
-                minY = MathUtil.getMinIgnoreNan(minY, r.start(), r.end());
-                maxY = MathUtil.getMaxIgnoreNan(maxY, r.start(), r.end());
-            }
-        }
-
-        return new Range(minY, maxY);
+        return TimelineDrawing.calculateYDrawingRange(startX, endX, getValues(),
+                (m, v) -> MathUtil.getMinIgnoreNan(m, v.start(), v.end()),
+                (m, v) -> MathUtil.getMaxIgnoreNan(m, v.start(), v.end()));
     }
 }

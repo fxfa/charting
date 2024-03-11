@@ -2,9 +2,10 @@ package charting.gui.drawings;
 
 import charting.gui.chart.ChartLegendString;
 import charting.gui.chart.DrawingContext;
-import charting.gui.chart.LegendDrawing;
 import charting.gui.chart.Line;
 import charting.timeline.Timeline;
+import charting.util.MathUtil;
+import charting.util.Range;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -15,7 +16,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class LineChart implements LegendDrawing {
+public class LineChart implements TimelineDrawing {
     private final ObjectProperty<Timeline<? extends Number>> values = new SimpleObjectProperty<>();
 
     private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.WHITE);
@@ -120,5 +121,12 @@ public class LineChart implements LegendDrawing {
 
     private int getEndIndex(DrawingContext c) {
         return (int) Math.min(c.getViewport().endX() + 2, getValues().size());
+    }
+
+    @Override
+    public Range getYDrawingRange(double startX, double endX) {
+        return TimelineDrawing.calculateYDrawingRange(startX, endX, getValues(),
+                (m, v) -> MathUtil.getMinIgnoreNan(m, v.doubleValue()),
+                (m, v) -> MathUtil.getMaxIgnoreNan(m, v.doubleValue()));
     }
 }

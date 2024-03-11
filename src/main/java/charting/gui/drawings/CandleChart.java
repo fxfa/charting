@@ -5,6 +5,7 @@ import charting.gui.chart.Line;
 import charting.gui.chart.*;
 import charting.timeline.Timeline;
 import charting.util.MathUtil;
+import charting.util.Range;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
@@ -15,7 +16,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class CandleChart implements LegendDrawing {
+public class CandleChart implements TimelineDrawing {
     private final static double BAR_WIDTH = 0.8;
 
     private final ObjectProperty<Timeline<? extends Candle>> candleTimeline = new SimpleObjectProperty<>();
@@ -180,5 +181,12 @@ public class CandleChart implements LegendDrawing {
 
     private Color getColor(Candle c) {
         return c.getOpen().doubleValue() < c.getClose().doubleValue() ? getBullishColor() : getBearishColor();
+    }
+
+    @Override
+    public Range getYDrawingRange(double startX, double endX) {
+        return TimelineDrawing.calculateYDrawingRange(startX, endX, getCandleTimeline(),
+                (m, c) -> MathUtil.getMinIgnoreNan(m, c.getLow().doubleValue()),
+                (m, c) -> MathUtil.getMaxIgnoreNan(m, c.getHigh().doubleValue()));
     }
 }

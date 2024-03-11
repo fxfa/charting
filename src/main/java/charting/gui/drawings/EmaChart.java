@@ -2,13 +2,14 @@ package charting.gui.drawings;
 
 import charting.indicators.Ema;
 import charting.timeline.Timeline;
+import charting.util.Range;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 
-public class EmaChart extends DelegateLegendDrawing {
+public class EmaChart extends DelegateLegendDrawing implements TimelineDrawing {
     private final LineChart line = new LineChart();
 
     private final IntegerProperty length = new SimpleIntegerProperty(10);
@@ -77,5 +78,10 @@ public class EmaChart extends DelegateLegendDrawing {
 
     public void setLength(int length) {
         this.length.set(length);
+    }
+
+    @Override
+    public Range getYDrawingRange(double startX, double endX) {
+        return line.getYDrawingRange(startX, endX);
     }
 }

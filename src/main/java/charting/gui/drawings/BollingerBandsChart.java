@@ -4,6 +4,7 @@ import charting.gui.chart.ChartLegendString;
 import charting.indicators.BollingerBands;
 import charting.timeline.MapperTimeline;
 import charting.timeline.Timeline;
+import charting.util.MathUtil;
 import charting.util.Range;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -15,7 +16,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class BollingerBandsChart extends DelegateLegendDrawing {
+public class BollingerBandsChart extends DelegateLegendDrawing implements TimelineDrawing {
     private final LineChart maLine = new LineChart();
     private final LineChart lowerLine = new LineChart();
     private final LineChart upperLine = new LineChart();
@@ -129,5 +130,12 @@ public class BollingerBandsChart extends DelegateLegendDrawing {
         strings.addAll(upperLine.getLegend(x));
 
         return strings;
+    }
+
+    @Override
+    public Range getYDrawingRange(double startX, double endX) {
+        return TimelineDrawing.calculateYDrawingRange(startX, endX, bollingerBands,
+                (m, v) -> MathUtil.getMinIgnoreNan(m, v.ma(), v.upper(), v.lower()),
+                (m, v) -> MathUtil.getMaxIgnoreNan(m, v.ma(), v.upper(), v.lower()));
     }
 }
