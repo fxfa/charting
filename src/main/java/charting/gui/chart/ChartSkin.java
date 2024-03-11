@@ -5,14 +5,18 @@ import charting.gui.util.NodeRenderingState;
 import charting.util.Range2D;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.scene.control.SkinBase;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
+import javafx.util.Subscription;
 
 public class ChartSkin extends SkinBase<Chart> {
+    private final Pane pane = new Pane();
     private final ChartCanvas chartCanvas = new ChartCanvas();
     private final ChartLegend chartLegend = new ChartLegend();
 
@@ -42,49 +46,72 @@ public class ChartSkin extends SkinBase<Chart> {
     private final EventHandler<MouseEvent> mouseEventFilter = this::onMouseEvent;
     private final EventHandler<ScrollEvent> scrollEventFilter = this::onScroll;
 
-    private final ChangeListener<Range2D> viewportMousePositionChangeListener =
-            (obs, oldVal, newVal) -> onViewportMousePositionChange();
+    private final Subscription chartSubscription;
 
     public ChartSkin(Chart chart) {
         super(chart);
 
-        chartCanvas.widthProperty().bind(chart.widthProperty());
-        chartCanvas.heightProperty().bind(chart.heightProperty());
-        chartCanvas.viewportProperty().bind(chart.viewportProperty());
+        Subscription s1 = chart.widthProperty().subscribe(this::updateChartCanvasSize);
+        Subscription s2 = chart.heightProperty().subscribe(this::updateChartCanvasSize);
+        Subscription s3 = chart.insetsProperty().subscribe(this::updateChartCanvasSize);
+        Subscription s4 = chart.viewportProperty().subscribe(this::onViewportMousePositionChange);
 
+        chartLegend.setMinWidth(Region.USE_PREF_SIZE);
+        chartLegend.setMinHeight(Region.USE_PREF_SIZE);
+        chartLegend.setMaxWidth(Region.USE_PREF_SIZE);
+        chartLegend.setMaxHeight(Region.USE_PREF_SIZE);
         chartLegend.titleProperty().bind(chart.titleProperty());
 
         renderingState = new NodeRenderingState(chart);
-        renderingState.renderingProperty().addListener((obs, oldVal, newVal) -> onRenderingStateChange(newVal));
-        onRenderingStateChange(renderingState.isRendering());
+        renderingState.renderingProperty().subscribe(this::onRenderingStateChange);
 
-        dragDistance = new NodeDragDistance(chart);
-        dragDistance.dragDistanceXProperty().addListener((obs, oldVal, newVal) -> chart.shiftDrawings(
-                toViewportWidth(newVal.doubleValue() - oldVal.doubleValue()), 0));
-        dragDistance.dragDistanceYProperty().addListener((obs, oldVal, newVal) -> chart.shiftDrawings(
-                0, toViewportHeight(newVal.doubleValue() - oldVal.doubleValue())));
+        dragDistance = new NodeDragDistance(chartCanvas);
+        dragDistance.dragDistanceXProperty().subscribe(this::onDragDistanceXChange);
+        dragDistance.dragDistanceYProperty().subscribe(this::onDragDistanceYChange);
 
-        chart.addEventFilter(MouseEvent.ANY, mouseEventFilter);
-        chart.addEventFilter(ScrollEvent.SCROLL, scrollEventFilter);
+        chartCanvas.viewportProperty().bind(chart.viewportProperty());
+        chartCanvas.addEventFilter(MouseEvent.ANY, mouseEventFilter);
+        chartCanvas.addEventFilter(ScrollEvent.SCROLL, scrollEventFilter);
 
-        chart.viewportProperty().addListener(viewportMousePositionChangeListener);
+        chartSubscription = Subscription.combine(s1, s2, s3, s4);
 
-        getChildren().addAll(chartCanvas, chartLegend);
+        updateChartCanvasSize();
+        onViewportMousePositionChange();
+
+        pane.getChildren().addAll(chartCanvas, chartLegend);
+        getChildren().add(pane);
+    }
+
+    private void updateChartCanvasSize() {
+        Insets i = getSkinnable().getInsets();
+        i = i == null ? Insets.EMPTY : i;
+
+        double w = getSkinnable().getWidth() - i.getLeft() - i.getRight();
+        double h = getSkinnable().getHeight() - i.getTop() - i.getBottom();
+
+        chartCanvas.setWidth(w);
+        chartCanvas.setHeight(h);
     }
 
     private void onRenderingStateChange(boolean rendering) {
-        if (rendering && getSkinnable() != null) {
+        if (rendering) {
             animationTimer.start();
         } else {
             animationTimer.stop();
         }
     }
 
-    private void onScroll(ScrollEvent e) {
-        if (getSkinnable() == null) {
-            return;
-        }
+    private void onDragDistanceXChange(Number oldVal, Number newVal) {
+        getSkinnable().shiftDrawings(
+                toViewportWidth(newVal.doubleValue() - oldVal.doubleValue()), 0);
+    }
 
+    private void onDragDistanceYChange(Number oldVal, Number newVal) {
+        getSkinnable().shiftDrawings(
+                0, toViewportHeight(newVal.doubleValue() - oldVal.doubleValue()));
+    }
+
+    private void onScroll(ScrollEvent e) {
         if (e.getDeltaY() != 0) {
             double f = e.getDeltaY() > 0 ?
                     getSkinnable().getZoomPerScrollTickX() : 1 / getSkinnable().getZoomPerScrollTickX();
@@ -123,10 +150,6 @@ public class ChartSkin extends SkinBase<Chart> {
     }
 
     private void onViewportMousePositionChange() {
-        if (getSkinnable() == null) {
-            return;
-        }
-
         double x = toViewportX(mouseX);
         double y = toViewportY(mouseY);
 
@@ -142,10 +165,6 @@ public class ChartSkin extends SkinBase<Chart> {
     }
 
     private void onMouseButtonEvent(MouseEvent e) {
-        if (getSkinnable() == null) {
-            return;
-        }
-
         MouseButtonEvent buttonEvent = new MouseButtonEvent(e,
                 toViewportX(mouseX), toViewportY(mouseY), mouseX, mouseY);
 
@@ -223,21 +242,18 @@ public class ChartSkin extends SkinBase<Chart> {
 
     @Override
     public void dispose() {
-        chartCanvas.widthProperty().unbind();
-        chartCanvas.heightProperty().unbind();
+        chartSubscription.unsubscribe();
+
         chartCanvas.viewportProperty().unbind();
+        chartCanvas.removeEventHandler(MouseEvent.ANY, mouseEventFilter);
+        chartCanvas.removeEventHandler(ScrollEvent.SCROLL, scrollEventFilter);
 
         chartLegend.titleProperty().unbind();
 
         dragDistance.dispose();
         renderingState.dispose();
 
-        getSkinnable().removeEventHandler(MouseEvent.ANY, mouseEventFilter);
-        getSkinnable().removeEventHandler(ScrollEvent.SCROLL, scrollEventFilter);
-
-        getSkinnable().viewportProperty().removeListener(viewportMousePositionChangeListener);
-
-        getChildren().removeAll(chartCanvas, chartLegend);
+        getChildren().remove(pane);
 
         animationTimer.stop();
 

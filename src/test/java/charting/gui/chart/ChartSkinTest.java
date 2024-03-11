@@ -29,11 +29,8 @@ class ChartSkinTest {
         Chart chart = spy(new Chart());
         chart.setViewport(new Range2D(0, 0, 100, 100));
 
-        DoubleProperty w = new SimpleDoubleProperty(200);
-        DoubleProperty h = new SimpleDoubleProperty(200);
-
-        when(chart.widthProperty()).thenReturn(w);
-        when(chart.heightProperty()).thenReturn(h);
+        when(chart.getWidth()).thenReturn(200d);
+        when(chart.getHeight()).thenReturn(200d);
 
         skin = new ChartSkin(chart);
     }
