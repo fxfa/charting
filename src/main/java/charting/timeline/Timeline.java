@@ -8,12 +8,18 @@ import java.util.ListIterator;
  * A data structure where elements are sorted in chronological order.
  */
 public interface Timeline<T> extends Iterable<Timestamped<T>> {
+    /**
+     * @return The first element or null if there are no elements.
+     */
     Timestamped<T> first();
 
+    /**
+     * @return The last element or null if there are no elements.
+     */
     Timestamped<T> last();
 
     /**
-     * @return The element at the given instant.
+     * @return The element at the given instant or null if there is no such element.
      */
     Timestamped<T> get(Instant instant);
 
@@ -38,12 +44,14 @@ public interface Timeline<T> extends Iterable<Timestamped<T>> {
     Timestamped<T> higher(Instant instant);
 
     /**
-     * @return The element at the given index.
+     * @return The element at the given index or null if there is no such element.
+     * @throws IllegalArgumentException If the index is negative.
      */
     Timestamped<T> get(int i);
 
     /**
      * @return A {@link ListIterator} starting from the given index.
+     * @throws IndexOutOfBoundsException If the index is out of the range (index < 0 || index >= size()).
      */
     ListIterator<Timestamped<T>> listIterator(int i);
 
@@ -65,7 +73,7 @@ public interface Timeline<T> extends Iterable<Timestamped<T>> {
     }
 
     /**
-     * @return The index of the given instant or -1 if the instant is not contained.
+     * @return The index of the given instant or (-(insertion point) - 1) if the instant is not contained.
      */
     int indexOf(Instant instant);
 
@@ -85,13 +93,13 @@ public interface Timeline<T> extends Iterable<Timestamped<T>> {
 
     /**
      * @return The index of the element that is greater than or equal to the given instant.
-     * -1 if no such element exists.
+     * (-(size) - 1) if no such element exists.
      */
     default int ceilingIndexOf(Instant instant) {
         int i = indexOf(instant);
 
         if (i == -size() - 1) {
-            return -1;
+            return i;
         }
 
         if (i < 0) {
@@ -121,14 +129,14 @@ public interface Timeline<T> extends Iterable<Timestamped<T>> {
 
     /**
      * @return The index of the element that is greater than the given instant.
-     * -1 if no such element exists.
+     * (-(size) - 1) if no such element exists.
      */
     default int higherIndexOf(Instant instant) {
         int i = indexOf(instant);
 
         int l = size();
         if (i == -l - 1 || i == l - 1) {
-            return -1;
+            return -l - 1;
         }
 
         if (i < 0) {
