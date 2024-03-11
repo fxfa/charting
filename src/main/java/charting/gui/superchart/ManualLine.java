@@ -6,13 +6,14 @@ import charting.gui.drawings.Line;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.scene.input.MouseButton;
 
 import java.util.List;
 
 public class ManualLine implements ManualDrawing {
     private final charting.gui.drawings.Line line = new charting.gui.drawings.Line();
 
-    private final IntegerProperty remaining = new SimpleIntegerProperty(2);
+    private final IntegerProperty remaining = new SimpleIntegerProperty(getTotalClicks());
 
     @Override
     public List<? extends Drawable> getDrawables(DrawingContext drawingContext) {
@@ -34,9 +35,14 @@ public class ManualLine implements ManualDrawing {
 
     @Override
     public void onMouseButtonEvent(MouseButtonEvent event) {
-        if (remaining.get() > 0 && event.isReleasedEvent()) {
-            remaining.set(remaining.get()-1);
+        if (remaining.get() > 0 && event.getButton() == MouseButton.PRIMARY && event.isReleasedEvent()) {
+            remaining.set(remaining.get() - 1);
         }
+    }
+
+    @Override
+    public int getTotalClicks() {
+        return 2;
     }
 
     @Override

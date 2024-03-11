@@ -8,6 +8,8 @@ import javafx.beans.property.ReadOnlyIntegerProperty;
  * Allows to manually draw an underlying {@link Drawing} by setting its coordinates via mouse events.
  */
 public interface ManualDrawing extends MouseEventDrawing {
+    int getTotalClicks();
+
     int getRemainingClicks();
 
     /**
@@ -15,6 +17,10 @@ public interface ManualDrawing extends MouseEventDrawing {
      * underlying {@link Drawing} have been set.
      */
     ReadOnlyIntegerProperty remainingClicksProperty();
+
+    default boolean isStarted() {
+        return getTotalClicks() != getRemainingClicks();
+    }
 
     default boolean isDone() {
         return getRemainingClicks() == 0;
