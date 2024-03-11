@@ -57,12 +57,13 @@ public final class OrderStatsTreeTimeline<T> extends NotificationBaseTimeline<T>
 
     @Override
     public Timestamped<T> get(int i) {
+        Preconditions.checkArgument(i >= 0);
         return extract(select(root, i));
     }
 
     @Override
     public ListIterator<Timestamped<T>> listIterator(int i) {
-        Preconditions.checkArgument(i >= 0 && i <= size());
+        Preconditions.checkIndex(i, size() + 1);
         return new ListIteratorImpl(i);
     }
 

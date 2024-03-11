@@ -6,7 +6,8 @@ import java.time.Instant;
 import java.util.ListIterator;
 
 /**
- * This class is meant to simplify the implementation of {@link Timeline}s that are based on another {@link Timeline}.
+ * This class is meant to simplify the implementation of {@link Timeline}s that are based on another {@link Timeline}
+ * with a 1 to 1 mapping.
  */
 public abstract class MappedTimeline<T, R> extends NotificationBaseTimeline<R> {
     private final Timeline<? extends T> base;
@@ -87,7 +88,7 @@ public abstract class MappedTimeline<T, R> extends NotificationBaseTimeline<R> {
 
     @Override
     public ListIterator<Timestamped<R>> listIterator(int i) {
-        Preconditions.checkArgument(i >= 0 && i <= size());
+        Preconditions.checkIndex(i, size() + 1);
 
         return new ListIterator<>() {
             private final ListIterator<? extends Timestamped<? extends T>> d = base.listIterator(i);

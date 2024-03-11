@@ -124,6 +124,7 @@ class OrderStatsTreeTimelineTest {
     @Test
     void getWithIndex() {
         assertNull(createTimeline().get(0));
+        assertThrows(IllegalArgumentException.class, () -> createTimeline().get(-1));
 
         Timestamped<Integer> t = createTimeline(1, 2, 3).get(0);
         assertNotNull(t);
@@ -193,8 +194,8 @@ class OrderStatsTreeTimelineTest {
         assertEquals(lIt.nextIndex(), tIt.nextIndex());
         assertThrows(NoSuchElementException.class, tIt::next);
 
-        assertThrows(IllegalArgumentException.class, () -> t.listIterator(-1));
-        assertThrows(IllegalArgumentException.class, () -> t.listIterator(6));
+        assertThrows(IndexOutOfBoundsException.class, () -> t.listIterator(-1));
+        assertThrows(IndexOutOfBoundsException.class, () -> t.listIterator(6));
     }
 
     @Test
