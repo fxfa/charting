@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import charting.gui.chart.Chart?>
 <?import charting.gui.superchart.indicatorspane.IndicatorsPane?>
 <?import charting.gui.superchart.TimeAxis?>
-<?import charting.gui.superchart.ValueAxis?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.SVGPath?>
-<StackPane xmlns:fx="http://javafx.com/fxml">
-    <HBox>
+<StackPane xmlns:fx="http://javafx.com/fxml" prefWidth="1200" prefHeight="800">
+    <HBox fx:id="mainPane">
         <VBox fx:id="objectToolbar" styleClass="object-toolbar">
-            <Button fx:id="trendLineButton" text="Trend line" maxWidth="Infinity"
+            <Button fx:id="trendLineButton" text="Trend line" minWidth="74" minHeight="74"
                     prefWidth="74" prefHeight="74" alignment="CENTER"
                     styleClass="object-toolbar-button, object-toolbar-trend-line-button"
                     onAction="#onTrendLineButtonAction">
@@ -22,7 +20,7 @@
                 </graphic>
             </Button>
 
-            <Button fx:id="horizontalLineButton" text="Horizontal line" maxWidth="Infinity"
+            <Button fx:id="horizontalLineButton" text="Horizontal line" minWidth="74" minHeight="74"
                     prefWidth="74" prefHeight="74" alignment="CENTER"
                     styleClass="object-toolbar-button, object-toolbar-horizontal-line-button"
                     onAction="#onHorizontalLineButtonAction">
@@ -32,7 +30,7 @@
                              a 4 4 90 0 1 -4 -4 a 4 4 90 0 1 4 -4 z M 24 20 L 40 20 z"/>
                 </graphic>
             </Button>
-            <Button fx:id="measureAreaButton" text="Measure area" maxWidth="Infinity"
+            <Button fx:id="measureAreaButton" text="Measure area" minWidth="74" minHeight="74"
                     prefWidth="74" prefHeight="74" alignment="CENTER"
                     styleClass="object-toolbar-button, object-toolbar-measure-area-button"
                     onAction="#onMeasureAreaButtonAction">
@@ -42,7 +40,7 @@
                              M 20 36 l 0 -32 z m 0 -32 l -5 5 z l 5 5"/>
                 </graphic>
             </Button>
-            <Button fx:id="indicatorButton" text="Indicators" maxWidth="Infinity"
+            <Button fx:id="indicatorButton" text="Indicators" minWidth="74" minHeight="74"
                     prefWidth="74" prefHeight="74" alignment="CENTER"
                     styleClass="object-toolbar-button, object-toolbar-indicator-button"
                     onAction="#onIndicatorButtonAction">
@@ -61,12 +59,10 @@
 
         <Separator styleClass="object-toolbar-separator" orientation="VERTICAL"/>
 
-        <GridPane HBox.hgrow="ALWAYS">
-            <Chart fx:id="chart" VBox.vgrow="ALWAYS" GridPane.rowIndex="0" GridPane.columnIndex="0"
-                   GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS"/>
-            <ValueAxis fx:id="valueAxis" GridPane.vgrow="ALWAYS" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-            <TimeAxis fx:id="timeAxis" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-            <Region styleClass="chart-axis-corner" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <GridPane fx:id="chartPane" HBox.hgrow="ALWAYS">
+            <TimeAxis fx:id="timeAxis" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS"/>
+            <Region fx:id="chartAxisCorner" styleClass="chart-axis-corner"
+                    GridPane.rowIndex="0" GridPane.columnIndex="1"/>
         </GridPane>
     </HBox>
 

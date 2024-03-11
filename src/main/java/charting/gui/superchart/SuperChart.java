@@ -2,16 +2,14 @@ package charting.gui.superchart;
 
 import charting.gui.chart.Drawing;
 import charting.gui.superchart.indicatorspane.Indicator;
+import charting.util.Range;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.css.*;
-import javafx.geometry.BoundingBox;
-import javafx.geometry.Bounds;
 import javafx.scene.control.Control;
 import javafx.scene.control.Skin;
 import javafx.scene.layout.Region;
@@ -25,8 +23,6 @@ import java.util.function.Consumer;
  * A charting control that provides advanced functionality like indicators or manual drawing.
  */
 public class SuperChart extends Control {
-    private static final PseudoClass DRAWING_PSEUDO_CLASS = PseudoClass.getPseudoClass("drawing");
-
     private static final StyleablePropertyFactory<SuperChart> FACTORY =
             new StyleablePropertyFactory<>(Region.getClassCssMetaData());
 
@@ -44,63 +40,32 @@ public class SuperChart extends Control {
             new SimpleStyleableObjectProperty<>(MOUSE_CROSSHAIRS_COLOR, this, "mouseCrossHairColor",
                     MOUSE_CROSSHAIRS_COLOR.getInitialValue(this));
 
-    private final StringProperty longName = new SimpleStringProperty();
-    private final StringProperty shortName = new SimpleStringProperty();
-    private final ObjectProperty<Bounds> viewport =
-            new SimpleObjectProperty<>(new BoundingBox(0, 0, 100, 100));
-
     private final ObservableList<Indicator> indicators = FXCollections.observableArrayList();
     private final ObjectProperty<Consumer<Indicator>> indicatorSelectionHandler = new SimpleObjectProperty<>();
 
+    private final ObjectProperty<Range> timeAxis = new SimpleObjectProperty<>(new Range(0, 100));
     private final ObjectProperty<TimeAxisPosConverter> timeAxisPosConverter =
             new SimpleObjectProperty<>(TimeAxisPosConverter.of(Instant::getEpochSecond, Instant::ofEpochSecond));
 
-    private final ObjectProperty<ManualDrawing> activeManualDrawing = new SimpleObjectProperty<>();
+    private final DoubleProperty legendX = new SimpleDoubleProperty();
 
-    private final ObservableList<Drawing> drawings = FXCollections.observableArrayList();
-
-    private final ChangeListener<Number> manualDrawingRemainingClicksChangeListener =
-            (obs, oldVal, newVal) -> onManualDrawingRemainingClicksChange();
+    private final ObservableList<ChartContent> chartContents = FXCollections.observableArrayList();
+    private final ObjectProperty<Drawing> userDrawing = new SimpleObjectProperty<>();
 
     public SuperChart() {
         getStyleClass().add("super-chart");
-
-        activeManualDrawing.addListener((obs, oldVal, newVal) -> onActiveManualDrawingChange(oldVal, newVal));
     }
 
-    private void onActiveManualDrawingChange(ManualDrawing oldVal, ManualDrawing newVal) {
-        pseudoClassStateChanged(DRAWING_PSEUDO_CLASS, newVal != null);
-
-        if (oldVal != null) {
-            oldVal.remainingClicksProperty().removeListener(manualDrawingRemainingClicksChangeListener);
-        }
-        if (newVal != null) {
-            newVal.remainingClicksProperty().addListener(manualDrawingRemainingClicksChangeListener);
-            onManualDrawingRemainingClicksChange();
-        }
+    public double getLegendX() {
+        return legendX.get();
     }
 
-    private void onManualDrawingRemainingClicksChange() {
-        if (getActiveManualDrawing().isDone()) {
-            getDrawings().add(getActiveManualDrawing().getUnderlying());
-            setActiveManualDrawing(null);
-        }
+    public DoubleProperty legendXProperty() {
+        return legendX;
     }
 
-    public ManualDrawing getActiveManualDrawing() {
-        return activeManualDrawing.get();
-    }
-
-    /**
-     * The {@link ManualDrawing}s underlying {@link Drawing} will automatically be added to
-     * {@link SuperChart#getDrawings()} once it is done.
-     */
-    public ObjectProperty<ManualDrawing> activeManualDrawingProperty() {
-        return activeManualDrawing;
-    }
-
-    public void setActiveManualDrawing(ManualDrawing activeManualDrawing) {
-        this.activeManualDrawing.set(activeManualDrawing);
+    public void setLegendX(double legendX) {
+        this.legendX.set(legendX);
     }
 
     public Consumer<Indicator> getIndicatorSelectionHandler() {
@@ -125,20 +90,23 @@ public class SuperChart extends Control {
         return indicators;
     }
 
-    public TimeAxisPosConverter getTimeAxisPosConverter() {
-        return timeAxisPosConverter.get();
+    public ObservableList<ChartContent> getChartContents() {
+        return chartContents;
     }
 
-    public ObjectProperty<TimeAxisPosConverter> timeAxisPosConverterProperty() {
-        return timeAxisPosConverter;
+    public Drawing getUserDrawing() {
+        return userDrawing.get();
     }
 
-    public void setTimeAxisPosConverter(TimeAxisPosConverter timeAxisPosConverter) {
-        this.timeAxisPosConverter.set(timeAxisPosConverter);
+    /**
+     * A {@link Drawing} which will be added to a {@link ChartContent} when its specific sub chart is clicked.
+     */
+    public ObjectProperty<Drawing> userDrawingProperty() {
+        return userDrawing;
     }
 
-    public ObservableList<Drawing> getDrawings() {
-        return drawings;
+    public void setUserDrawing(Drawing userDrawing) {
+        this.userDrawing.set(userDrawing);
     }
 
     public Color getMouseCrosshairsColor() {
@@ -165,43 +133,28 @@ public class SuperChart extends Control {
         this.watermarkColor.set(watermarkColor);
     }
 
-    public Bounds getViewport() {
-        return viewport.get();
+    public TimeAxisPosConverter getTimeAxisPosConverter() {
+        return timeAxisPosConverter.get();
     }
 
-    /**
-     * The viewport defines the {@link SuperChart}s display bounds.
-     */
-    public ObjectProperty<Bounds> viewportProperty() {
-        return viewport;
+    public ObjectProperty<TimeAxisPosConverter> timeAxisPosConverterProperty() {
+        return timeAxisPosConverter;
     }
 
-    public void setViewport(Bounds viewport) {
-        this.viewport.set(viewport);
+    public void setTimeAxisPosConverter(TimeAxisPosConverter timeAxisPosConverter) {
+        this.timeAxisPosConverter.set(timeAxisPosConverter);
     }
 
-    public String getLongName() {
-        return longName.getName();
+    public Range getTimeAxis() {
+        return timeAxis.get();
     }
 
-    public StringProperty longNameProperty() {
-        return longName;
+    public ObjectProperty<Range> timeAxisProperty() {
+        return timeAxis;
     }
 
-    public void setLongName(String longName) {
-        this.longName.set(longName);
-    }
-
-    public String getShortName() {
-        return shortName.get();
-    }
-
-    public StringProperty shortNameProperty() {
-        return shortName;
-    }
-
-    public void setShortName(String shortName) {
-        this.shortName.set(shortName);
+    public void setTimeAxis(Range timeAxis) {
+        this.timeAxis.set(timeAxis);
     }
 
     @Override

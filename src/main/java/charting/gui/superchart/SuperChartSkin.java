@@ -5,7 +5,6 @@ import charting.gui.chart.Drawing;
 import charting.gui.superchart.indicatorspane.Indicator;
 import charting.gui.superchart.indicatorspane.IndicatorsPane;
 import charting.gui.util.NodeLoader;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.css.PseudoClass;
 import javafx.event.EventHandler;
@@ -17,8 +16,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.util.Subscription;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,11 +28,14 @@ public class SuperChartSkin extends SkinBase<SuperChart> {
     private final StackPane root;
 
     @FXML
-    private Chart chart;
+    private HBox mainPane;
+
     @FXML
-    private ValueAxis valueAxis;
+    private GridPane chartPane;
     @FXML
     private TimeAxis timeAxis;
+    @FXML
+    private Region chartAxisCorner;
 
     @FXML
     private VBox objectToolbar;
@@ -49,86 +51,175 @@ public class SuperChartSkin extends SkinBase<SuperChart> {
     @FXML
     private IndicatorsPane indicatorsPane;
 
-    private final Watermark watermark = new Watermark();
-    private final MouseCrosshairs mouseCrosshairs = new MouseCrosshairs();
+    private final List<ChartRow> chartRows = new ArrayList<>();
+    private final List<DividerRow> dividerRows = new ArrayList<>();
 
-    private final EventHandler<MouseEvent> chartMouseEventFilter = this::onChartMouseEventFiltering;
     private final EventHandler<KeyEvent> keyEventFilter = this::onKeyEvent;
 
     private final ListChangeListener<Indicator> indicatorsListener =
             c -> indicatorsPane.getIndicators().setAll(c.getList());
-    private final ListChangeListener<Drawing> drawingsListener = c -> updateChartDrawings();
+    private final ListChangeListener<ChartContent> chartContentsListener = this::onSubChartsChange;
 
-    private final ChangeListener<Bounds> layoutBoundsListener = (obs, oldVal, newVal) -> positionIndicatorsPane();
-
-    private final ChangeListener<ManualDrawing> activeManualDrawingListener =
-            (obs, oldVal, newVal) -> onActiveManualDrawingChange(newVal);
+    private final Subscription superChartSubscription;
 
     public SuperChartSkin(SuperChart superChart) {
         super(superChart);
-
-        consumeMouseEvents(false);
 
         root = NodeLoader.loadNew(this);
         root.minWidthProperty().bind(superChart.widthProperty());
         root.minHeightProperty().bind(superChart.heightProperty());
 
-        chart.viewportProperty().bindBidirectional(superChart.viewportProperty());
-        chart.titleProperty().bind(superChart.longNameProperty());
-        chart.addEventFilter(MouseEvent.ANY, chartMouseEventFilter);
-
-        watermark.shortNameProperty().bind(superChart.shortNameProperty());
-        watermark.longNameProperty().bind(superChart.longNameProperty());
-        watermark.colorProperty().bind(superChart.watermarkColorProperty());
-
-        mouseCrosshairs.colorProperty().bind(superChart.mouseCrosshairsColorProperty());
-
-        timeAxis.viewportProperty().bindBidirectional(superChart.viewportProperty());
+        timeAxis.axisProperty().bindBidirectional(superChart.timeAxisProperty());
         timeAxis.timeAxisPosConverterProperty().bind(superChart.timeAxisPosConverterProperty());
-
-        valueAxis.viewportProperty().bindBidirectional(superChart.viewportProperty());
 
         indicatorsPane.setCloseButtonActionHandler(this::hideIndicatorsPane);
         indicatorsPane.setIndicatorSelectionHandler(this::onIndicatorSelection);
-        indicatorsPane.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> positionIndicatorsPane());
-        indicatorsPane.getIndicators().setAll(superChart.getIndicators());
+        indicatorsPane.layoutBoundsProperty().subscribe(this::positionIndicatorsPane);
 
+        Subscription s1 = superChart.userDrawingProperty().subscribe(this::onUserDrawingChange);
+        Subscription s2 = superChart.getIndicators().subscribe(this::updateIndicators);
+        Subscription s3 = superChart.layoutBoundsProperty().subscribe(this::positionIndicatorsPane);
+        superChart.getChartContents().addListener(chartContentsListener);
         superChart.getIndicators().addListener(indicatorsListener);
-        superChart.layoutBoundsProperty().addListener(layoutBoundsListener);
-        superChart.activeManualDrawingProperty().addListener(activeManualDrawingListener);
-        superChart.getDrawings().addListener(drawingsListener);
-        superChart.addEventFilter(KeyEvent.KEY_RELEASED, keyEventFilter);
+        superChart.addEventFilter(KeyEvent.KEY_PRESSED, keyEventFilter);
 
-        updateChartDrawings();
+        mainPane.addEventFilter(MouseEvent.ANY, this::onMouseEvent);
+
+        superChartSubscription = Subscription.combine(s1, s2, s3);
+
+        updateIndicators();
+        addSubCharts(superChart.getChartContents());
 
         getChildren().add(root);
     }
 
-    private void updateChartDrawings() {
-        if (getSkinnable() == null) {
-            chart.getDrawings().clear();
+    private void updateIndicators() {
+        if (getSkinnable() != null) {
+            indicatorsPane.getIndicators().setAll(getSkinnable().getIndicators());
         }
-
-        List<Drawing> drawings = new ArrayList<>();
-        drawings.add(watermark);
-        drawings.addAll(getSkinnable().getDrawings());
-        if (getSkinnable().getActiveManualDrawing() != null) {
-            drawings.add(getSkinnable().getActiveManualDrawing());
-        }
-        drawings.add(mouseCrosshairs);
-
-        chart.getDrawings().setAll(drawings);
     }
 
-    private void onActiveManualDrawingChange(ManualDrawing newVal) {
-        if (newVal != null) {
-            hideIndicatorsPane();
+    private void onSubChartsChange(ListChangeListener.Change<? extends ChartContent> change) {
+        while (change.next()) {
+            removeSubCharts(change.getRemoved());
+            addSubCharts(change.getAddedSubList());
+        }
+    }
+
+    private void removeSubCharts(List<? extends ChartContent> chartContents) {
+        for (ChartContent c : chartContents) {
+            ChartRow row = chartRows.stream().filter(r -> r.getContent().equals(c)).findFirst().orElseThrow();
+            row.dispose();
+
+            chartRows.remove(row);
+
+            if (!dividerRows.isEmpty()) {
+                dividerRows.remove(dividerRows.size() - 1);
+            }
         }
 
-        trendLineButton.pseudoClassStateChanged(ACTIVE_PSEUDO_CLASS, newVal instanceof ManualLine);
-        horizontalLineButton.pseudoClassStateChanged(ACTIVE_PSEUDO_CLASS, newVal instanceof ManualHorizontalLine);
-        measureAreaButton.pseudoClassStateChanged(ACTIVE_PSEUDO_CLASS, newVal instanceof ManualMeasureArea);
-        updateChartDrawings();
+        repopulateChartPane();
+    }
+
+    private void addSubCharts(List<? extends ChartContent> chartContents) {
+        double h = chartContents.size() / ((double) chartRows.size() + chartContents.size()) * chartPane.getHeight();
+        shrinkChartRows(h);
+
+        for (ChartContent content : chartContents) {
+            ChartRow chartRow = new ChartRow(getSkinnable(), content, timeAxis);
+            chartRow.getChart().legendXProperty().addListener((obs, oldVal, newVal) ->
+                    onChartLegendXChange(chartRow, newVal.doubleValue()));
+            chartRows.add(chartRow);
+
+            if (chartRows.size() > 1) {
+                DividerRow d = new DividerRow(chartPane);
+                d.setChartRows(chartRows.get(chartRows.size() - 2), chartRow);
+                dividerRows.add(d);
+            }
+
+            chartRow.getConstraints().setMinHeight(60);
+            chartRow.getConstraints().setPrefHeight(h / chartContents.size());
+            chartRow.getConstraints().setMaxHeight(Double.POSITIVE_INFINITY);
+        }
+
+        repopulateChartPane();
+    }
+
+    private void repopulateChartPane() {
+        chartPane.getChildren().clear();
+        chartPane.getRowConstraints().clear();
+
+        for (int i = 0; i < chartRows.size() + dividerRows.size() + 1; i++) {
+            chartPane.getRowConstraints().add(new RowConstraints());
+        }
+
+        for (int i = 0; i < chartRows.size(); i++) {
+            ChartRow r = chartRows.get(i);
+            chartPane.addRow(i * 2, r.getChart(), r.getValueAxis());
+            chartPane.getRowConstraints().set(i * 2, r.getConstraints());
+        }
+
+        for (int i = 0; i < dividerRows.size(); i++) {
+            chartPane.addRow(i * 2 + 1, dividerRows.get(i).getDivider());
+        }
+
+        chartPane.addRow(chartPane.getRowCount(), timeAxis, chartAxisCorner);
+    }
+
+    private void updateSubChartPrefHeights() {
+        chartPane.layout();
+        for (ChartRow r : chartRows) {
+            double h = chartPane.getCellBounds(0, GridPane.getRowIndex(r.getChart())).getHeight();
+            r.getConstraints().setPrefHeight(h);
+        }
+    }
+
+    private void shrinkChartRows(double height) {
+        updateSubChartPrefHeights();
+
+        double totalChartHeight = chartPane.getChildren().stream()
+                .filter(c -> c instanceof Chart)
+                .mapToDouble(c -> chartPane.getCellBounds(0, GridPane.getRowIndex(c)).getHeight())
+                .sum();
+
+        for (ChartRow r : chartRows) {
+            RowConstraints c = r.getConstraints();
+
+            double d = height / totalChartHeight * c.getPrefHeight();
+            d = Math.min(d, c.getPrefHeight() - c.getMinHeight());
+            totalChartHeight -= c.getPrefHeight();
+            c.setPrefHeight(c.getPrefHeight() - d);
+            height -= d;
+        }
+    }
+
+    private void onUserDrawingChange(Drawing d) {
+        trendLineButton.pseudoClassStateChanged(ACTIVE_PSEUDO_CLASS, false);
+        horizontalLineButton.pseudoClassStateChanged(ACTIVE_PSEUDO_CLASS, false);
+        measureAreaButton.pseudoClassStateChanged(ACTIVE_PSEUDO_CLASS, false);
+
+        if (d instanceof ManualLine) {
+            trendLineButton.pseudoClassStateChanged(ACTIVE_PSEUDO_CLASS, true);
+        } else if (d instanceof ManualHorizontalLine) {
+            horizontalLineButton.pseudoClassStateChanged(ACTIVE_PSEUDO_CLASS, true);
+        } else if (d instanceof ManualMeasureArea) {
+            measureAreaButton.pseudoClassStateChanged(ACTIVE_PSEUDO_CLASS, true);
+        }
+    }
+
+    private void onChartLegendXChange(ChartRow c, double x) {
+        if (getSkinnable() == null) {
+            return;
+        }
+
+        if (getSkinnable().legendXProperty().isBound()) {
+            c.getChart().setLegendX(getSkinnable().getLegendX());
+        } else {
+            getSkinnable().setLegendX(x);
+            for (ChartRow s : chartRows) {
+                s.getChart().setLegendX(x);
+            }
+        }
     }
 
     private void onIndicatorSelection(Indicator indicator) {
@@ -137,92 +228,64 @@ public class SuperChartSkin extends SkinBase<SuperChart> {
         }
     }
 
-    private void onChartMouseEventFiltering(MouseEvent e) {
-        if (getSkinnable() == null) {
-            return;
-        }
-
+    private void onMouseEvent(MouseEvent e) {
         if (e.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
             hideIndicatorsPane();
-        } else if (e.getEventType().equals(MouseEvent.MOUSE_RELEASED) && e.getButton().equals(MouseButton.SECONDARY)) {
-            getSkinnable().setActiveManualDrawing(null);
         }
 
-        if (e.getEventType().equals(MouseEvent.MOUSE_EXITED) ||
-                e.getEventType().equals(MouseEvent.MOUSE_EXITED_TARGET)) {
-            timeAxis.setCursorMarkPosition(Double.NaN);
-            valueAxis.setCursorMarkPosition(Double.NaN);
-        } else {
-            timeAxis.setCursorMarkPosition(e.getX());
-            valueAxis.setCursorMarkPosition(e.getY());
+        if (getSkinnable() != null) {
+            if (e.getEventType().equals(MouseEvent.MOUSE_RELEASED) && e.getButton().equals(MouseButton.SECONDARY)) {
+                getSkinnable().setUserDrawing(null);
+            }
         }
     }
 
     private void onKeyEvent(KeyEvent e) {
-        if (getSkinnable() != null && e.getCode() == KeyCode.ESCAPE) {
+        if (e.getCode() == KeyCode.ESCAPE) {
             hideIndicatorsPane();
-            getSkinnable().setActiveManualDrawing(null);
+
+            if (getSkinnable() != null) {
+                getSkinnable().setUserDrawing(null);
+            }
         }
     }
 
     @FXML
     private void onTrendLineButtonAction() {
-        hideIndicatorsPane();
-
-        if (getSkinnable() == null) {
-            return;
-        }
-
-        if (getSkinnable().getActiveManualDrawing() instanceof ManualLine) {
-            getSkinnable().setActiveManualDrawing(null);
-        } else {
-            getSkinnable().setActiveManualDrawing(new ManualLine());
-        }
+        onDrawingButtonAction(new ManualLine());
     }
 
     @FXML
     private void onHorizontalLineButtonAction() {
-        hideIndicatorsPane();
-
-        if (getSkinnable() == null) {
-            return;
-        }
-
-        if (getSkinnable().getActiveManualDrawing() instanceof ManualHorizontalLine) {
-            getSkinnable().setActiveManualDrawing(null);
-        } else {
-            getSkinnable().setActiveManualDrawing(new ManualHorizontalLine());
-        }
+        onDrawingButtonAction(new ManualHorizontalLine());
     }
 
     @FXML
     private void onMeasureAreaButtonAction() {
-        hideIndicatorsPane();
+        onDrawingButtonAction(new ManualMeasureArea());
+    }
 
-        if (getSkinnable() == null) {
+    private void onDrawingButtonAction(Drawing d) {
+        SuperChart s = getSkinnable();
+
+        if (s == null || s.userDrawingProperty().isBound()) {
             return;
         }
 
-        if (getSkinnable().getActiveManualDrawing() instanceof ManualMeasureArea) {
-            getSkinnable().setActiveManualDrawing(null);
+        if (s.getUserDrawing() != null && s.getUserDrawing().getClass().equals(d.getClass())) {
+            s.setUserDrawing(null);
         } else {
-            getSkinnable().setActiveManualDrawing(new ManualMeasureArea());
+            s.setUserDrawing(d);
         }
     }
 
     @FXML
     private void onIndicatorButtonAction() {
-        if (getSkinnable() == null) {
-            return;
+        if (getSkinnable() != null) {
+            getSkinnable().setUserDrawing(null);
         }
 
-        getSkinnable().setActiveManualDrawing(null);
-
-        if (indicatorsPane.isVisible()) {
-            hideIndicatorsPane();
-        } else {
-            showIndicatorsPane();
-        }
+        showIndicatorsPane();
     }
 
     private void hideIndicatorsPane() {
@@ -237,16 +300,14 @@ public class SuperChartSkin extends SkinBase<SuperChart> {
     }
 
     private void positionIndicatorsPane() {
-        if (getSkinnable() == null) {
-            return;
+        if (getSkinnable() != null) {
+            Bounds b1 = getSkinnable().getLayoutBounds();
+            Bounds b2 = indicatorsPane.getLayoutBounds();
+            indicatorsPane.relocate(Math.round(b1.getCenterX() - b2.getCenterX()),
+                    Math.round(b1.getCenterY() - b2.getCenterY()));
+            indicatorsPane.setTranslateX(0);
+            indicatorsPane.setTranslateY(0);
         }
-
-        Bounds b1 = getSkinnable().getLayoutBounds();
-        Bounds b2 = indicatorsPane.getLayoutBounds();
-        indicatorsPane.relocate(Math.round(b1.getCenterX() - b2.getCenterX()),
-                Math.round(b1.getCenterY() - b2.getCenterY()));
-        indicatorsPane.setTranslateX(0);
-        indicatorsPane.setTranslateY(0);
     }
 
     @Override
@@ -254,26 +315,14 @@ public class SuperChartSkin extends SkinBase<SuperChart> {
         root.minWidthProperty().unbind();
         root.minHeightProperty().unbind();
 
-        chart.viewportProperty().unbindBidirectional(getSkinnable().viewportProperty());
-        chart.titleProperty().unbind();
-        chart.removeEventFilter(MouseEvent.ANY, chartMouseEventFilter);
-
-        watermark.shortNameProperty().unbind();
-        watermark.longNameProperty().unbind();
-        watermark.colorProperty().unbind();
-
-        mouseCrosshairs.colorProperty().unbind();
-
-        timeAxis.viewportProperty().unbindBidirectional(getSkinnable().viewportProperty());
+        timeAxis.axisProperty().unbindBidirectional(getSkinnable().timeAxisProperty());
         timeAxis.timeAxisPosConverterProperty().unbind();
 
-        valueAxis.viewportProperty().unbindBidirectional(getSkinnable().viewportProperty());
-
+        getSkinnable().getChartContents().removeListener(chartContentsListener);
         getSkinnable().getIndicators().removeListener(indicatorsListener);
-        getSkinnable().layoutBoundsProperty().removeListener(layoutBoundsListener);
-        getSkinnable().activeManualDrawingProperty().removeListener(activeManualDrawingListener);
-        getSkinnable().getDrawings().removeListener(drawingsListener);
-        getSkinnable().removeEventFilter(KeyEvent.KEY_RELEASED, keyEventFilter);
+        getSkinnable().removeEventFilter(KeyEvent.KEY_PRESSED, keyEventFilter);
+
+        superChartSubscription.unsubscribe();
 
         getChildren().remove(root);
 

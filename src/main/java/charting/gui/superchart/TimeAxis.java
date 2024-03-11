@@ -1,13 +1,11 @@
 package charting.gui.superchart;
 
 import charting.gui.util.NodeLoader;
+import charting.util.Preconditions;
+import charting.util.Range;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.css.CssMetaData;
-import javafx.css.Styleable;
-import javafx.geometry.BoundingBox;
-import javafx.geometry.Bounds;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
@@ -30,7 +28,7 @@ public class TimeAxis extends SuperChartAxis {
     private final ObjectProperty<TimeAxisPosConverter> timeAxisPosConverter =
             new SimpleObjectProperty<>(TimeAxisPosConverter.of(Instant::getEpochSecond, Instant::ofEpochSecond));
     private final ObjectProperty<DateTimeFormatter> markFormatter =
-            new SimpleObjectProperty<>(DateTimeFormatter.ofPattern("EE MMM dd ''yy, HH:mm"));
+            new SimpleObjectProperty<>(DateTimeFormatter.ofPattern("EE MMM dd ''yy"));
 
     private final TreeMap<Double, Mark<ZonedDateTime>> marks = new TreeMap<>();
 
@@ -42,7 +40,7 @@ public class TimeAxis extends SuperChartAxis {
     private double anchor;
 
     private double mouseDownX = Double.NaN;
-    private Bounds mouseDownViewport;
+    private Range mouseDownAxis;
 
     private final Font font = new Font(15);
 
@@ -52,7 +50,7 @@ public class TimeAxis extends SuperChartAxis {
         ChangeListener<Object> calculateListener = (obs, oldVal, newVal) -> calculateMarks();
         widthProperty().addListener(calculateListener);
         heightProperty().addListener(calculateListener);
-        viewportProperty().addListener(calculateListener);
+        axisProperty().addListener(calculateListener);
         cursorMarkPositionProperty().addListener(calculateListener);
         timeAxisPosConverter.addListener(calculateListener);
         markFormatter.addListener(calculateListener);
@@ -90,41 +88,37 @@ public class TimeAxis extends SuperChartAxis {
         e.consume();
 
         mouseDownX = e.getX();
-        mouseDownViewport = getViewport();
+        mouseDownAxis = getAxis();
     }
 
     private void onMouseDragged(MouseEvent e) {
         e.consume();
 
-        if (mouseDownViewport == null) {
+        if (mouseDownAxis == null) {
             return;
         }
 
         double f = Math.max(1, getCanvas().getWidth() - mouseDownX) / Math.max(1, getCanvas().getWidth() - e.getX());
-        double w = mouseDownViewport.getWidth() * f;
-        setViewport(new BoundingBox(mouseDownViewport.getMaxX() - w, mouseDownViewport.getMinY(),
-                w, mouseDownViewport.getHeight()));
+        double start = mouseDownAxis.end() - mouseDownAxis.getLength() * f;
+        setAxis(new Range(start, mouseDownAxis.end()));
     }
 
     private void onScroll(ScrollEvent e) {
         e.consume();
 
-        if (getViewport() == null) {
+        if (getAxis() == null) {
             return;
         }
 
-        double f = e.getDeltaY() > 0 ? 1 / 1.05 : e.getDeltaY() < 0 ? 1.05 : 1;
-        double w = getViewport().getWidth() * f;
-        setViewport(new BoundingBox(getViewport().getMaxX() - w, getViewport().getMinY(),
-                w, getViewport().getHeight()));
+        setAxis(getAxis().scaled(e.getDeltaY() > 0 ? 1 / 1.05 : e.getDeltaY() < 0 ? 1.05 : 1, getAxis().end()));
     }
 
     private double getScale() {
-        return getViewport() == null ? Double.NaN : (getCanvas().getWidth() / getViewport().getWidth());
+        return getAxis() == null ? Double.NaN : (getCanvas().getWidth() / getAxis().getLength());
     }
 
     private double getTranslate() {
-        return getViewport() == null ? Double.NaN : -getViewport().getMinX();
+        return getAxis() == null ? Double.NaN : -getAxis().start();
     }
 
     public void setAnchorYear(Instant instant) {
@@ -132,9 +126,11 @@ public class TimeAxis extends SuperChartAxis {
     }
 
     private void calculateMarks() {
-        if (getCanvas().getWidth() == 0 || getViewport() == null) {
+        if (getCanvas().getWidth() == 0 || getAxis() == null) {
             return;
         }
+
+        Preconditions.checkArgument(getAxis().isPositive());
 
         gap = GAP / getScale();
 

@@ -1,11 +1,11 @@
 package charting.gui.superchart;
 
+import charting.util.Range;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.*;
-import javafx.geometry.Bounds;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -29,7 +29,7 @@ public abstract class SuperChartAxis extends Region {
             new SimpleStyleableObjectProperty<>(CURSOR_MARK_BACKGROUND_COLOR, this,
                     "cursorMarkBackgroundColor", CURSOR_MARK_BACKGROUND_COLOR.getInitialValue(this));
 
-    private final ObjectProperty<Bounds> viewport = new SimpleObjectProperty<>();
+    private final ObjectProperty<Range> axis = new SimpleObjectProperty<>(new Range(0, 100));
 
     private final DoubleProperty cursorMarkPosition = new SimpleDoubleProperty(Double.NaN);
 
@@ -66,16 +66,16 @@ public abstract class SuperChartAxis extends Region {
         this.cursorMarkBackgroundColor.set(cursorMarkBackgroundColor);
     }
 
-    public Bounds getViewport() {
-        return viewport.get();
+    public Range getAxis() {
+        return axis.get();
     }
 
-    public ObjectProperty<Bounds> viewportProperty() {
-        return viewport;
+    public ObjectProperty<Range> axisProperty() {
+        return axis;
     }
 
-    public void setViewport(Bounds viewport) {
-        this.viewport.set(viewport);
+    public void setAxis(Range axis) {
+        this.axis.set(axis);
     }
 
     public double getCursorMarkPosition() {

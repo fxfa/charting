@@ -1,9 +1,8 @@
 package charting.gui.superchart;
 
 import charting.gui.util.NodeLoader;
+import charting.util.Range;
 import javafx.beans.value.ChangeListener;
-import javafx.geometry.BoundingBox;
-import javafx.geometry.Bounds;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
@@ -21,7 +20,7 @@ public class ValueAxis extends SuperChartAxis {
     private double gap;
 
     private double mouseDownY = Double.NaN;
-    private Bounds mouseDownViewport;
+    private Range mouseDownAxis;
 
     private final Font font = new Font(15);
 
@@ -31,7 +30,7 @@ public class ValueAxis extends SuperChartAxis {
         ChangeListener<Object> redrawListener = (obs, oldVal, newVal) -> redraw();
         widthProperty().addListener(redrawListener);
         heightProperty().addListener(redrawListener);
-        viewportProperty().addListener(redrawListener);
+        axisProperty().addListener(redrawListener);
         cursorMarkPositionProperty().addListener(redrawListener);
 
         addEventHandler(MouseEvent.MOUSE_PRESSED, this::onMousePressed);
@@ -43,45 +42,36 @@ public class ValueAxis extends SuperChartAxis {
         e.consume();
 
         mouseDownY = e.getY();
-        mouseDownViewport = getViewport();
+        mouseDownAxis = getAxis();
     }
 
     private void onMouseDragged(MouseEvent e) {
         e.consume();
 
-        if (mouseDownViewport == null) {
+        if (mouseDownAxis == null) {
             return;
         }
 
         double p = (mouseDownY - e.getY()) / (getCanvas().getHeight() * 0.1);
-        double f = 1 - Math.pow(0.85, p);
-        double d = mouseDownViewport.getHeight() * f;
-        double start = mouseDownViewport.getMinY() + d / 2;
-        double end = mouseDownViewport.getMaxY() - d / 2;
-
-        setViewport(new BoundingBox(mouseDownViewport.getMinX(), start, mouseDownViewport.getWidth(), end - start));
+        setAxis(mouseDownAxis.scaled(Math.pow(0.85, p)));
     }
 
     private void onScroll(ScrollEvent e) {
         e.consume();
 
-        if (getViewport() == null) {
+        if (getAxis() == null) {
             return;
         }
 
-        double f = e.getDeltaY() > 0 ? 1 / 1.05 : e.getDeltaY() < 0 ? 1.05 : 1;
-        double d = getViewport().getHeight() - getViewport().getHeight() * f;
-        double start = getViewport().getMinY() + d / 2;
-        double end = getViewport().getMaxY() - d / 2;
-        setViewport(new BoundingBox(getViewport().getMinX(), start, getViewport().getWidth(), end - start));
+        setAxis(getAxis().scaled(e.getDeltaY() > 0 ? 1 / 1.05 : e.getDeltaY() < 0 ? 1.05 : 1));
     }
 
     private double getScale() {
-        return getViewport() == null ? Double.NaN : (getCanvas().getHeight() / -getViewport().getHeight());
+        return getAxis() == null ? Double.NaN : (getCanvas().getHeight() / -getAxis().getLength());
     }
 
     private double getTranslate() {
-        return getViewport() == null ? Double.NaN : -getViewport().getMaxY();
+        return getAxis() == null ? Double.NaN : -getAxis().end();
     }
 
     private void redraw() {
