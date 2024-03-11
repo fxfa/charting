@@ -1,10 +1,10 @@
 .super-chart {
-    -fx-background-color: #050b1c;
-    -fx-watermark-color: #ffffff12;
+    -fx-background-color: #171c2c;
+    -fx-watermark-color: #171c2c;
 }
 
 .object-toolbar {
-    -fx-background-color: transparent;
+    -fx-background-color: #050b1c;
     -fx-spacing: 5px;
     -fx-padding: 5px;
 }
@@ -29,13 +29,13 @@
 .object-toolbar-separator .line {
     -fx-border-style: solid;
     -fx-border-width: 0 5 0 0;
-    -fx-border-color: #ffffff10;
+    -fx-border-color: #171c2c;
 }
 
 .chart {
     -fx-cursor: crosshair;
     -fx-padding: 0;
-    -fx-background-color: transparent;
+    -fx-background-color: #050b1c;
 }
 
 .chart-legend {
@@ -62,10 +62,11 @@
 }
 
 .value-axis {
+    -fx-background-color: #050b1c;
     -fx-border-style: solid;
-    -fx-border-color: #777777;
+    -fx-border-color: #757575;
     -fx-border-width: 0 0 0 1;
-    -fx-cursor-mark-background-color: derive(#050b1c, 40%);
+    -fx-cursor-mark-background-color: derive(#050b1c, 35%);
     -fx-mark-color: white;
 }
 
@@ -73,11 +74,26 @@
     -fx-cursor: v-resize;
 }
 
+.chart-divider {
+    -fx-background-color: transparent, #757575;
+    -fx-background-insets: 0, 0.475 0 0.475 0;
+    -fx-min-height: 1px;
+    -fx-pref-height: 1px;
+    -fx-max-height: 1px;
+    -fx-scale-y: 20;
+}
+
+.chart-divider:hover, .chart-divider:dragging {
+    -fx-background-color: #ffffff14, #757575;
+    -fx-cursor: v-resize;
+}
+
 .time-axis {
+    -fx-background-color: #050b1c;
     -fx-border-style: solid;
-    -fx-border-color: #777777;
+    -fx-border-color: #757575;
     -fx-border-width: 1 0 0 0;
-    -fx-cursor-mark-background-color: derive(#050b1c, 40%);
+    -fx-cursor-mark-background-color: derive(#050b1c, 35%);
     -fx-mark-color: white;
 }
 
@@ -86,7 +102,8 @@
 }
 
 .chart-axis-corner {
+    -fx-background-color: #050b1c;
     -fx-border-style: solid;
-    -fx-border-color: #777777;
+    -fx-border-color: #757575;
     -fx-border-width: 1 0 0 1;
 }
