@@ -11,6 +11,18 @@ public final class Preconditions {
         checkArgument(argCondition, null);
     }
 
+    public static void checkIndex(int i, int length, String message) {
+        if (i < 0 || i >= length) {
+            throw new IndexOutOfBoundsException(message);
+        }
+    }
+
+    public static void checkIndex(int i, int length) {
+        if (i < 0 || i >= length) {
+            throw new IndexOutOfBoundsException(i);
+        }
+    }
+
     private Preconditions() {
     }
 }
