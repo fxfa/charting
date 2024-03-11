@@ -1,46 +1,56 @@
 package charting.gui.drawings;
 
-import charting.data.Candle;
-import charting.gui.chart.Line;
-import charting.gui.chart.*;
+import charting.gui.chart.ChartLegendString;
 import charting.indicators.BollingerBands;
 import charting.timeline.MapperTimeline;
 import charting.timeline.Timeline;
+import charting.util.Range;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
-public class BollingerBandsChart implements LegendDrawing {
-    private final IntegerProperty length = new SimpleIntegerProperty(20);
-
-    private final ObjectProperty<Color> movingAverageColor = new SimpleObjectProperty<>(Color.ORANGE);
-    private final ObjectProperty<Color> bandColor = new SimpleObjectProperty<>(Color.DODGERBLUE);
-
+public class BollingerBandsChart extends DelegateLegendDrawing {
     private final LineChart maLine = new LineChart();
-    private final LineChart upperLine = new LineChart();
     private final LineChart lowerLine = new LineChart();
+    private final LineChart upperLine = new LineChart();
+    private final BandChart band = new BandChart();
 
-    private final ObjectProperty<Timeline<? extends Candle>> base = new SimpleObjectProperty<>();
+    private final IntegerProperty length = new SimpleIntegerProperty(20);
+    private final ObjectProperty<Timeline<? extends Number>> base = new SimpleObjectProperty<>();
     private BollingerBands bollingerBands;
 
-    public BollingerBandsChart(Timeline<? extends Candle> base) {
+    public BollingerBandsChart(Timeline<? extends Number> base, int length) {
+        this();
+        setBase(base);
+        setLength(length);
+    }
+
+
+    public BollingerBandsChart(Timeline<? extends Number> base) {
         this();
         setBase(base);
     }
 
     public BollingerBandsChart() {
-        maLine.colorProperty().bind(movingAverageColor);
-        upperLine.colorProperty().bind(bandColor);
-        lowerLine.colorProperty().bind(bandColor);
+        maLine.setDescription("BB: ");
+        maLine.setColor(Color.ORANGE);
+        lowerLine.setDescription("  ");
+        lowerLine.setColor(Color.DODGERBLUE);
+        upperLine.setDescription("  ");
+        upperLine.colorProperty().bind(lowerLine.colorProperty());
+        band.colorProperty().bind(lowerLine.colorProperty().map(c ->
+                c.deriveColor(0, 1, 1, 0.05)));
 
-        baseProperty().addListener((obs, oldVal, newVal) -> updateBollinger());
-        length.addListener((obs, oldVal, newVal) -> updateBollinger());
+        setDelegates(band, maLine, lowerLine, upperLine);
+
+        base.subscribe(this::updateBollinger);
+        length.subscribe(this::updateBollinger);
     }
 
     private void updateBollinger() {
@@ -49,23 +59,25 @@ public class BollingerBandsChart implements LegendDrawing {
             maLine.setValues(null);
             upperLine.setValues(null);
             lowerLine.setValues(null);
+            band.setValues(null);
         } else {
             bollingerBands = new BollingerBands(getBase(), getLength(), 2);
             maLine.setValues(new MapperTimeline<>(bollingerBands, BollingerBands.Values::ma));
             upperLine.setValues(new MapperTimeline<>(bollingerBands, BollingerBands.Values::upper));
             lowerLine.setValues(new MapperTimeline<>(bollingerBands, BollingerBands.Values::lower));
+            band.setValues(new MapperTimeline<>(bollingerBands, b -> new Range(b.lower(), b.upper())));
         }
     }
 
-    public Timeline<? extends Candle> getBase() {
+    public Timeline<? extends Number> getBase() {
         return base.get();
     }
 
-    public ObjectProperty<Timeline<? extends Candle>> baseProperty() {
+    public ObjectProperty<Timeline<? extends Number>> baseProperty() {
         return base;
     }
 
-    public void setBase(Timeline<? extends Candle> base) {
+    public void setBase(Timeline<? extends Number> base) {
         this.base.set(base);
     }
 
@@ -82,82 +94,40 @@ public class BollingerBandsChart implements LegendDrawing {
     }
 
     public Color getMovingAverageColor() {
-        return movingAverageColor.get();
+        return maLine.getColor();
     }
 
     public ObjectProperty<Color> movingAverageColorProperty() {
-        return movingAverageColor;
+        return maLine.colorProperty();
     }
 
     public void setMovingAverageColor(Color movingAverageColor) {
-        this.movingAverageColor.set(movingAverageColor);
+        maLine.setColor(movingAverageColor);
     }
 
     public Color getBandColor() {
-        return bandColor.get();
+        return lowerLine.getColor();
     }
 
     public ObjectProperty<Color> bandColorProperty() {
-        return bandColor;
+        return lowerLine.colorProperty();
     }
 
     public void setBandColor(Color bandColor) {
-        this.bandColor.set(bandColor);
-    }
-
-    @Override
-    public List<? extends Drawable> getDrawables(DrawingContext context) {
-        if (bollingerBands == null) {
-            return Collections.emptyList();
-        }
-
-        List<Line> upperLines = upperLine.getDrawables(context);
-        List<Line> lowerLines = lowerLine.getDrawables(context);
-
-        double[] xs = new double[upperLines.size() * 2 + 2];
-        double[] ys = new double[upperLines.size() * 2 + 2];
-
-        for (int i = 0; i < upperLines.size(); i++) {
-            xs[i] = upperLines.get(i).getX1();
-            ys[i] = upperLines.get(i).getY1();
-        }
-        xs[upperLines.size()] = upperLines.get(upperLines.size() - 1).getX2();
-        ys[upperLines.size()] = upperLines.get(upperLines.size() - 1).getY2();
-
-        for (int i = 0; i < lowerLines.size(); i++) {
-            xs[lowerLines.size() + 1 + i] = lowerLines.get(lowerLines.size() - 1 - i).getX2();
-            ys[lowerLines.size() + 1 + i] = lowerLines.get(lowerLines.size() - 1 - i).getY2();
-        }
-        xs[upperLines.size() * 2 + 1] = lowerLines.get(0).getX1();
-        ys[upperLines.size() * 2 + 1] = lowerLines.get(0).getY1();
-
-        List<Drawable> drawables = new ArrayList<>();
-        drawables.add(new Polygon(xs, ys, getBandColor().deriveColor(
-                0, 1, 1, 0.05)));
-        drawables.addAll(maLine.getDrawables(context));
-        drawables.addAll(upperLines);
-        drawables.addAll(lowerLines);
-
-        return drawables;
+        lowerLine.setColor(bandColor);
     }
 
     @Override
     public List<ChartLegendString> getLegend(double x) {
-        int s = bollingerBands == null ? 0 : bollingerBands.size();
-
-        if (s == 0) {
+        if (getDelegates() == null) {
             return Collections.emptyList();
         }
 
-        int i = (int) (Double.isNaN(x) ? s - 1 : Math.min(Math.max(0, Math.round(x)), s - 1));
-        BollingerBands.Values v = bollingerBands.get(i).value();
-        double ma = Math.round(v.ma() * 100) / 100d;
-        double u = Math.round(v.upper() * 100) / 100d;
-        double l = Math.round(v.lower() * 100) / 100d;
+        List<ChartLegendString> strings = new LinkedList<>();
+        strings.addAll(maLine.getLegend(x));
+        strings.addAll(lowerLine.getLegend(x));
+        strings.addAll(upperLine.getLegend(x));
 
-        return List.of(new ChartLegendString("BB:", "", Color.TRANSPARENT),
-                new ChartLegendString(" ", String.valueOf(ma), getMovingAverageColor()),
-                new ChartLegendString(" ", String.valueOf(u), getBandColor()),
-                new ChartLegendString(" ", String.valueOf(l), getBandColor()));
+        return strings;
     }
 }

@@ -1,9 +1,5 @@
 package charting.gui.drawings;
 
-import charting.gui.chart.ChartLegendString;
-import charting.gui.chart.Drawable;
-import charting.gui.chart.DrawingContext;
-import charting.gui.chart.LegendDrawing;
 import charting.indicators.Ema;
 import charting.timeline.Timeline;
 import javafx.beans.property.IntegerProperty;
@@ -12,13 +8,10 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 
-import java.util.List;
+public class EmaChart extends DelegateLegendDrawing {
+    private final LineChart line = new LineChart();
 
-public class EmaChart implements LegendDrawing {
     private final IntegerProperty length = new SimpleIntegerProperty(10);
-
-    private final LineChart delegate = new LineChart();
-
     private final ObjectProperty<Timeline<? extends Number>> base = new SimpleObjectProperty<>();
 
     public EmaChart(Timeline<? extends Number> base, int length) {
@@ -33,18 +26,20 @@ public class EmaChart implements LegendDrawing {
     }
 
     public EmaChart() {
-        delegate.setDescription("EMA: ");
-        delegate.setColor(Color.DARKORCHID);
+        line.setDescription("EMA: ");
+        line.setColor(Color.DARKORCHID);
 
-        baseProperty().addListener((obs, oldVal, newVal) -> updateEma());
-        length.addListener((obs, oldVal, newVal) -> updateEma());
+        setDelegates(line);
+
+        base.subscribe(this::updateEma);
+        length.subscribe(this::updateEma);
     }
 
     private void updateEma() {
         if (getBase() == null) {
-            delegate.setValues(null);
+            line.setValues(null);
         } else {
-            delegate.setValues(new Ema(getBase(), getLength()));
+            line.setValues(new Ema(getBase(), getLength()));
         }
     }
 
@@ -61,15 +56,15 @@ public class EmaChart implements LegendDrawing {
     }
 
     public Color getColor() {
-        return delegate.getColor();
+        return line.getColor();
     }
 
     public ObjectProperty<Color> colorProperty() {
-        return delegate.colorProperty();
+        return line.colorProperty();
     }
 
     public void setColor(Color color) {
-        delegate.setColor(color);
+        line.setColor(color);
     }
 
     public int getLength() {
@@ -82,15 +77,5 @@ public class EmaChart implements LegendDrawing {
 
     public void setLength(int length) {
         this.length.set(length);
-    }
-
-    @Override
-    public List<? extends Drawable> getDrawables(DrawingContext context) {
-        return delegate.getDrawables(context);
-    }
-
-    @Override
-    public List<ChartLegendString> getLegend(double x) {
-        return delegate.getLegend(x);
     }
 }

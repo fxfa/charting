@@ -4,6 +4,7 @@ import charting.data.Candle;
 import charting.gui.chart.*;
 import charting.timeline.Timeline;
 import charting.timeline.Timestamped;
+import charting.util.MathUtil;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
@@ -77,10 +78,9 @@ public class VolumeChart implements LegendDrawing {
         int i = (int) (Double.isNaN(x) ? s - 1 : Math.min(Math.max(0, Math.round(x)), s - 1));
         Candle c = getCandleTimeline().get(i).value();
 
-        double volume = Math.round(c.getVolume().doubleValue() * 100) / 100d;
+        double volume = c.getVolume().doubleValue();
 
-        return List.of(new ChartLegendString("Vol: ",
-                BigDecimal.valueOf(volume).stripTrailingZeros().toPlainString(), getColor(c)));
+        return List.of(new ChartLegendString("Vol: ", volume, getColor(c)));
     }
 
     @Override

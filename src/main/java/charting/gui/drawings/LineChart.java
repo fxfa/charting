@@ -20,7 +20,7 @@ public class LineChart implements LegendDrawing {
 
     private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.WHITE);
 
-    private final StringProperty description = new SimpleStringProperty();
+    private final StringProperty description = new SimpleStringProperty("");
 
     public LineChart() {
     }
@@ -79,9 +79,9 @@ public class LineChart implements LegendDrawing {
         }
 
         int i = (int) (Double.isNaN(x) ? s - 1 : Math.min(Math.max(0, Math.round(x)), s - 1));
-        double value = Math.round(getValues().get(i).value().doubleValue() * 100) / 100d;
+        double v = getValues().get(i).value().doubleValue();
 
-        return List.of(new ChartLegendString(getDescription(), String.valueOf(value), getColor()));
+        return List.of(new ChartLegendString(getDescription(), v, getColor()));
     }
 
     @Override

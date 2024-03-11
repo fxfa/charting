@@ -2,6 +2,7 @@ package charting.gui.drawings;
 
 import charting.gui.chart.Line;
 import charting.gui.chart.*;
+import charting.util.MathUtil;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -183,8 +184,8 @@ public class MeasureArea implements Drawing {
     }
 
     private String getText() {
-        double valueDif = Math.round((getEndY() - getStartY()) * 100) / 100.0;
-        double valuePctDif = Math.round((getEndY() - getStartY()) / Math.abs(getStartY()) * 100 * 100) / 100d;
+        double valueDif = (getEndY() - getStartY());
+        double valuePctDif = (getEndY() - getStartY()) / Math.abs(getStartY()) * 100;
         double barDif = getEndX() - getStartX();
         return """
                 %.2f (%.2f%%)

@@ -4,6 +4,7 @@ import charting.data.Candle;
 import charting.gui.chart.Line;
 import charting.gui.chart.*;
 import charting.timeline.Timeline;
+import charting.util.MathUtil;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
@@ -80,18 +81,18 @@ public class CandleChart implements LegendDrawing {
         int i = (int) (Double.isNaN(x) ? s - 1 : Math.min(Math.max(0, Math.round(x)), s - 1));
         Candle c = getCandleTimeline().get(i).value();
 
-        double open = Math.round(c.getOpen().doubleValue() * 100) / 100d;
-        double high = Math.round(c.getHigh().doubleValue() * 100) / 100d;
-        double low = Math.round(c.getLow().doubleValue() * 100) / 100d;
-        double close = Math.round(c.getClose().doubleValue() * 100) / 100d;
+        double open = c.getOpen().doubleValue();
+        double high = c.getHigh().doubleValue();
+        double low = c.getLow().doubleValue();
+        double close = c.getClose().doubleValue();
 
         Color color = getColor(c);
 
         List<ChartLegendString> strings = new ArrayList<>();
-        strings.add(new ChartLegendString("O: ", toPlainString(open), color));
-        strings.add(new ChartLegendString("   H: ", toPlainString(high), color));
-        strings.add(new ChartLegendString("   L: ", toPlainString(low), color));
-        strings.add(new ChartLegendString("   C: ", toPlainString(close), color));
+        strings.add(new ChartLegendString("O: ", open, color));
+        strings.add(new ChartLegendString("   H: ", high, color));
+        strings.add(new ChartLegendString("   L: ", low, color));
+        strings.add(new ChartLegendString("   C: ", close, color));
         strings.add(new ChartLegendString("    Δ: ",
                 (getAbsDiff(i) + " " + getPctDiff(i)).stripTrailing(), color));
 
@@ -102,7 +103,7 @@ public class CandleChart implements LegendDrawing {
         if (i > 0) {
             double close = getCandleTimeline().get(i).value().getClose().doubleValue();
             double previousClose = getCandleTimeline().get(i - 1).value().getClose().doubleValue();
-            return toPlainString(Math.round((close - previousClose) * 100) / 100d);
+            return NumberFormatUtil.format((close - previousClose));
         }
 
         return "";
@@ -112,15 +113,11 @@ public class CandleChart implements LegendDrawing {
         if (i > 0) {
             double close = getCandleTimeline().get(i).value().getClose().doubleValue();
             double previousClose = getCandleTimeline().get(i - 1).value().getClose().doubleValue();
-            double pctDiff = Math.round((close - previousClose) / previousClose * 100 * 100) / 100d;
-            return String.format("(%s%s%%)", pctDiff >= 0 ? "+" : "", toPlainString(pctDiff));
+            double pctDiff = (close - previousClose) / previousClose * 100;
+            return String.format("(%s%s%%)", pctDiff >= 0 ? "+" : "", NumberFormatUtil.format(pctDiff));
         }
 
         return "";
-    }
-
-    private String toPlainString(double v) {
-        return BigDecimal.valueOf(v).stripTrailingZeros().toPlainString();
     }
 
     @Override
