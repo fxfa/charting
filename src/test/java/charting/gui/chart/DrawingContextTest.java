@@ -1,7 +1,6 @@
 package charting.gui.chart;
 
-import javafx.geometry.BoundingBox;
-import javafx.geometry.Bounds;
+import charting.util.Range2D;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +11,7 @@ class DrawingContextTest {
 
     @BeforeEach
     void beforeEach() {
-        Bounds b = new BoundingBox(0, 0, 100, 100);
+        Range2D b = new Range2D(0, 0, 100, 100);
         context = new DrawingContext(b, 200, 200);
     }
 

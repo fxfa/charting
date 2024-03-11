@@ -1,24 +1,22 @@
 package charting.gui.chart;
 
+import charting.util.Range2D;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.geometry.BoundingBox;
-import javafx.geometry.Bounds;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 
 import java.util.List;
 
 class ChartCanvas extends Canvas {
-    private final ObjectProperty<Bounds> viewport =
-            new SimpleObjectProperty<>(new BoundingBox(0, 0, 100, 100));
+    private final ObjectProperty<Range2D> viewport = new SimpleObjectProperty<>(new Range2D(0, 0, 100, 100));
 
     ChartCanvas() {
         getStyleClass().add("chart-canvas");
     }
 
     void update(List<Drawing> drawings) {
-        Bounds v = viewport.get() == null ? new BoundingBox(0, 0, 0, 0) : viewport.get();
+        Range2D v = viewport.get() == null ? Range2D.NAN : viewport.get();
         DrawingContext drawingContext = new DrawingContext(v, getWidth(), getHeight());
 
         getGraphicsContext2D().clearRect(0, 0, getWidth(), getHeight());
@@ -110,7 +108,7 @@ class ChartCanvas extends Canvas {
         }
     }
 
-    ObjectProperty<Bounds> viewportProperty() {
+    ObjectProperty<Range2D> viewportProperty() {
         return viewport;
     }
 }

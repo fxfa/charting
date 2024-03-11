@@ -1,10 +1,9 @@
 package charting.gui.chart;
 
+import charting.util.Range2D;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.BoundingBox;
-import javafx.geometry.Bounds;
 import javafx.scene.control.Control;
 import javafx.scene.control.Skin;
 
@@ -16,8 +15,8 @@ public class Chart extends Control {
     private final ObservableList<Drawing> drawings = FXCollections.observableArrayList();
 
     private final StringProperty title = new SimpleStringProperty("");
-    private final ObjectProperty<Bounds> viewport =
-            new SimpleObjectProperty<>(new BoundingBox(0, 0, 100, 100));
+    private final ObjectProperty<Range2D> viewport =
+            new SimpleObjectProperty<>(new Range2D(0, 0, 100, 100));
 
     private final DoubleProperty zoomPerScrollTickX = new SimpleDoubleProperty(1.05);
     private final DoubleProperty zoomPerScrollTickY = new SimpleDoubleProperty(1.05);
@@ -41,27 +40,14 @@ public class Chart extends Control {
      * Shifts the drawings. As a consequence, the viewport will be translated by -distance
      */
     public void shiftDrawings(double viewportDistanceX, double viewportDistanceY) {
-        Bounds v = getViewport();
-
-        setViewport(new BoundingBox(v.getMinX() - viewportDistanceX, v.getMinY() - viewportDistanceY,
-                v.getWidth(), v.getHeight()));
+        setViewport(getViewport().translated(-viewportDistanceX, -viewportDistanceY));
     }
 
     /**
      * Zooms the drawings. As a consequence the viewport will be scaled by 1/factor.
      */
     public void zoomDrawings(double factorX, double factorY, double viewportPivotX, double viewportPivotY) {
-        Bounds v = getViewport();
-
-        factorX = 1 / factorX;
-        factorY = 1 / factorY;
-
-        double x = factorX * v.getMinX() + (1 - factorX) * viewportPivotX;
-        double y = factorY * v.getMinY() + (1 - factorY) * viewportPivotY;
-        double w = v.getMaxX() * factorX - v.getMinX() * factorX;
-        double h = v.getMaxY() * factorY - v.getMinY() * factorY;
-
-        setViewport(new BoundingBox(x, y, w, h));
+        setViewport(getViewport().scaled(1 / factorX, 1 / factorY, viewportPivotX, viewportPivotY));
     }
 
     public ObservableList<Drawing> getDrawings() {
@@ -113,18 +99,18 @@ public class Chart extends Control {
         titleProperty().set(title);
     }
 
-    public Bounds getViewport() {
+    public Range2D getViewport() {
         return viewportProperty().get();
     }
 
     /**
      * The viewport defines the {@link Chart}s display bounds.
      */
-    public ObjectProperty<Bounds> viewportProperty() {
+    public ObjectProperty<Range2D> viewportProperty() {
         return viewport;
     }
 
-    public void setViewport(Bounds viewport) {
+    public void setViewport(Range2D viewport) {
         viewportProperty().set(viewport);
     }
 

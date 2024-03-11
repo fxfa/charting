@@ -1,9 +1,9 @@
 package charting.gui.chart;
 
+import charting.util.Range2D;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.geometry.BoundingBox;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class ChartSkinTest {
     @BeforeEach
     void beforeEach() {
         Chart chart = spy(new Chart());
-        chart.setViewport(new BoundingBox(0, 0, 100, 100));
+        chart.setViewport(new Range2D(0, 0, 100, 100));
 
         DoubleProperty w = new SimpleDoubleProperty(200);
         DoubleProperty h = new SimpleDoubleProperty(200);

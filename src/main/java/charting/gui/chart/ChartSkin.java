@@ -2,6 +2,7 @@ package charting.gui.chart;
 
 import charting.gui.util.NodeDragDistance;
 import charting.gui.util.NodeRenderingState;
+import charting.util.Range2D;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -41,7 +42,7 @@ public class ChartSkin extends SkinBase<Chart> {
     private final EventHandler<MouseEvent> mouseEventFilter = this::onMouseEvent;
     private final EventHandler<ScrollEvent> scrollEventFilter = this::onScroll;
 
-    private final ChangeListener<Bounds> viewportMousePositionChangeListener =
+    private final ChangeListener<Range2D> viewportMousePositionChangeListener =
             (obs, oldVal, newVal) -> onViewportMousePositionChange();
 
     public ChartSkin(Chart chart) {
@@ -88,7 +89,7 @@ public class ChartSkin extends SkinBase<Chart> {
             double f = e.getDeltaY() > 0 ?
                     getSkinnable().getZoomPerScrollTickX() : 1 / getSkinnable().getZoomPerScrollTickX();
             getSkinnable().zoomDrawings(f, 1, e.isControlDown() ?
-                    toViewportX(e.getX()) : getSkinnable().getViewport().getMaxX(), 0);
+                    toViewportX(e.getX()) : getSkinnable().getViewport().endX(), 0);
         }
         if (e.getDeltaX() != 0) {
             double f = e.getDeltaX() > 0 ?
@@ -176,43 +177,48 @@ public class ChartSkin extends SkinBase<Chart> {
     }
 
     public double toViewportX(double canvasX) {
-        Bounds v = getSkinnable() == null ? null : getSkinnable().getViewport();
-        return ViewportUtil.toTargetX(chartCanvas.getBoundsInLocal(), canvasX, v);
+        Range2D v = getSkinnable() == null ? Range2D.NAN : getSkinnable().getViewport();
+        return getChartCanvasRange2D().toTargetX(canvasX, v);
     }
 
     public double toViewportY(double canvasY) {
-        Bounds v = getSkinnable() == null ? null : getSkinnable().getViewport();
-        return ViewportUtil.toTargetY(chartCanvas.getBoundsInLocal(), chartCanvas.getHeight() - canvasY, v);
+        Range2D v = getSkinnable() == null ? Range2D.NAN : getSkinnable().getViewport();
+        return getChartCanvasRange2D().toTargetY(chartCanvas.getHeight() - canvasY, v);
     }
 
     public double toViewportWidth(double canvasWidth) {
-        Bounds v = getSkinnable() == null ? null : getSkinnable().getViewport();
-        return ViewportUtil.toTargetWidth(chartCanvas.getBoundsInLocal(), canvasWidth, v);
+        Range2D v = getSkinnable() == null ? Range2D.NAN : getSkinnable().getViewport();
+        return getChartCanvasRange2D().toTargetWidth(canvasWidth, v);
     }
 
     public double toViewportHeight(double canvasHeight) {
-        Bounds v = getSkinnable() == null ? null : getSkinnable().getViewport();
-        return -ViewportUtil.toTargetHeight(chartCanvas.getBoundsInLocal(), canvasHeight, v);
+        Range2D v = getSkinnable() == null ? Range2D.NAN : getSkinnable().getViewport();
+        return -getChartCanvasRange2D().toTargetHeight(canvasHeight, v);
     }
 
     public double toCanvasX(double viewportX) {
-        Bounds v = getSkinnable() == null ? null : getSkinnable().getViewport();
-        return ViewportUtil.toTargetX(v, viewportX, chartCanvas.getBoundsInLocal());
+        Range2D v = getSkinnable() == null ? Range2D.NAN : getSkinnable().getViewport();
+        return v.toTargetX(viewportX, getChartCanvasRange2D());
     }
 
     public double toCanvasY(double viewportY) {
-        Bounds v = getSkinnable() == null ? null : getSkinnable().getViewport();
-        return chartCanvas.getHeight() - ViewportUtil.toTargetY(v, viewportY, chartCanvas.getBoundsInLocal());
+        Range2D v = getSkinnable() == null ? Range2D.NAN : getSkinnable().getViewport();
+        return chartCanvas.getHeight() - v.toTargetY(viewportY, getChartCanvasRange2D());
     }
 
     public double toCanvasWidth(double canvasWidth) {
-        Bounds v = getSkinnable() == null ? null : getSkinnable().getViewport();
-        return ViewportUtil.toTargetWidth(v, canvasWidth, chartCanvas.getBoundsInLocal());
+        Range2D v = getSkinnable() == null ? Range2D.NAN : getSkinnable().getViewport();
+        return v.toTargetWidth(canvasWidth, getChartCanvasRange2D());
     }
 
     public double toCanvasHeight(double canvasHeight) {
-        Bounds v = getSkinnable() == null ? null : getSkinnable().getViewport();
-        return -ViewportUtil.toTargetHeight(v, canvasHeight, chartCanvas.getBoundsInLocal());
+        Range2D v = getSkinnable() == null ? Range2D.NAN : getSkinnable().getViewport();
+        return -v.toTargetHeight(canvasHeight, getChartCanvasRange2D());
+    }
+
+    private Range2D getChartCanvasRange2D() {
+        Bounds b = chartCanvas.getBoundsInLocal();
+        return new Range2D(b.getMinX(), b.getMinY(), b.getMaxX(), b.getMaxY());
     }
 
     @Override
