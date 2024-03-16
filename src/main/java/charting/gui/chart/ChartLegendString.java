@@ -1,6 +1,9 @@
 package charting.gui.chart;
 
+import charting.gui.drawings.NumberFormatUtil;
 import javafx.scene.paint.Color;
+
+import java.math.RoundingMode;
 
 /**
  * A legend string consists of a description string and a colored value string.
@@ -14,6 +17,18 @@ public final class ChartLegendString {
         this.description = description;
         this.value = value;
         this.color = color;
+    }
+
+    public ChartLegendString(String description, double value, Color color) {
+        this(description, value, 2, color);
+    }
+
+    public ChartLegendString(String description, double value, int precision, Color color) {
+        this(description, value, precision, RoundingMode.HALF_UP, color);
+    }
+
+    public ChartLegendString(String description, double value, int precision, RoundingMode roundingMode, Color color) {
+        this(description, NumberFormatUtil.format(value, precision, roundingMode), color);
     }
 
     public String getDescription() {
