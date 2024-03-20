@@ -5,9 +5,11 @@ import charting.gui.util.NodeRenderingState;
 import charting.util.Range2D;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.scene.control.SkinBase;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -46,6 +48,8 @@ public class ChartSkin extends SkinBase<Chart> {
     private final EventHandler<MouseEvent> mouseEventFilter = this::onMouseEvent;
     private final EventHandler<ScrollEvent> scrollEventFilter = this::onScroll;
 
+    private final ReadOnlyObjectWrapper<Point2D> viewportMousePos = new ReadOnlyObjectWrapper<>();
+
     private final Subscription chartSubscription;
 
     public ChartSkin(Chart chart) {
@@ -54,7 +58,10 @@ public class ChartSkin extends SkinBase<Chart> {
         Subscription s1 = chart.widthProperty().subscribe(this::updateChartCanvasSize);
         Subscription s2 = chart.heightProperty().subscribe(this::updateChartCanvasSize);
         Subscription s3 = chart.insetsProperty().subscribe(this::updateChartCanvasSize);
-        Subscription s4 = chart.viewportProperty().subscribe(this::onViewportMousePositionChange);
+        Subscription s4 = chart.viewportProperty().subscribe(this::onViewportChange);
+
+        Subscription s5 = viewportMousePos.subscribe(this::onViewportMousePositionChange);
+        viewportMousePos.set(new Point2D(Double.NaN, Double.NaN));
 
         chartLegend.setMinWidth(Region.USE_PREF_SIZE);
         chartLegend.setMinHeight(Region.USE_PREF_SIZE);
@@ -73,10 +80,9 @@ public class ChartSkin extends SkinBase<Chart> {
         chartCanvas.addEventFilter(MouseEvent.ANY, mouseEventFilter);
         chartCanvas.addEventFilter(ScrollEvent.SCROLL, scrollEventFilter);
 
-        chartSubscription = Subscription.combine(s1, s2, s3, s4);
+        chartSubscription = Subscription.combine(s1, s2, s3, s4, s5);
 
         updateChartCanvasSize();
-        onViewportMousePositionChange();
 
         pane.getChildren().addAll(chartCanvas, chartLegend);
         getChildren().add(pane);
@@ -141,7 +147,7 @@ public class ChartSkin extends SkinBase<Chart> {
         if (!Double.valueOf(mx).equals(mouseX) || !Double.valueOf(my).equals(mouseY)) {
             mouseX = mx;
             mouseY = my;
-            onViewportMousePositionChange();
+            viewportMousePos.set(new Point2D(toViewportX(mouseX), toViewportY(mouseY)));
         }
 
         if (e.getEventType().equals(MouseEvent.MOUSE_PRESSED) || e.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
@@ -149,17 +155,19 @@ public class ChartSkin extends SkinBase<Chart> {
         }
     }
 
-    private void onViewportMousePositionChange() {
-        double x = toViewportX(mouseX);
-        double y = toViewportY(mouseY);
+    private void onViewportChange() {
+        viewportMousePos.set(new Point2D(toViewportX(mouseX), toViewportY(mouseY)));
+    }
 
-        if (!getSkinnable().legendXProperty().isBound()) {
-            getSkinnable().setLegendX(x);
+    private void onViewportMousePositionChange(Point2D oldPos, Point2D newPos) {
+        if (!getSkinnable().legendXProperty().isBound() &&
+                oldPos != null && !Double.valueOf(newPos.getX()).equals(oldPos.getX())) {
+            getSkinnable().setLegendX(newPos.getX());
         }
 
         for (Drawing d : getSkinnable().getDrawings()) {
             if (d instanceof MouseEventDrawing m) {
-                m.onMousePositionChange(x, y, mouseX, mouseY);
+                m.onMousePositionChange(newPos.getX(), newPos.getY(), mouseX, mouseY);
             }
         }
     }
@@ -185,6 +193,14 @@ public class ChartSkin extends SkinBase<Chart> {
 
     private void updateLegend() {
         chartLegend.update(getSkinnable().getDrawings(), getSkinnable().getLegendX());
+    }
+
+    public Point2D getViewportMousePos() {
+        return viewportMousePos.get();
+    }
+
+    public ReadOnlyObjectProperty<Point2D> viewportMousePosProperty() {
+        return viewportMousePos.getReadOnlyProperty();
     }
 
     public Bounds getCanvasBounds() {
