@@ -75,16 +75,21 @@
 }
 
 .chart-divider {
-    -fx-background-color: transparent, #757575;
-    -fx-background-insets: 0, 0.475 0 0.475 0;
+    -fx-background-color: #757575;
     -fx-min-height: 1px;
     -fx-pref-height: 1px;
     -fx-max-height: 1px;
-    -fx-scale-y: 20;
 }
 
-.chart-divider:hover, .chart-divider:dragging {
-    -fx-background-color: #ffffff14, #757575;
+.chart-divider-drag-box {
+    -fx-background-color: transparent;
+    -fx-min-height: 12px;
+    -fx-pref-height: 12px;
+    -fx-max-height: 12px;
+}
+
+.chart-divider-drag-box:hover, .chart-divider-drag-box:dragging {
+    -fx-background-color: #ffffff14;
     -fx-cursor: v-resize;
 }
 

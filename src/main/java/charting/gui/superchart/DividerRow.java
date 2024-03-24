@@ -2,10 +2,7 @@ package charting.gui.superchart;
 
 import charting.gui.util.NodeDragDistance;
 import javafx.css.PseudoClass;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.*;
 
 class DividerRow {
     private final static PseudoClass DRAGGING_PSEUDO_CLASS = PseudoClass.getPseudoClass("dragging");
@@ -14,7 +11,7 @@ class DividerRow {
 
     private final GridPane chartPane;
 
-    private final Region divider = new Region();
+    private final StackPane divider = new StackPane();
 
     private ChartRow upper;
     private ChartRow lower;
@@ -22,17 +19,26 @@ class DividerRow {
     DividerRow(GridPane chartPane) {
         this.chartPane = chartPane;
 
+        Region dividerDragBox = new Region();
+        dividerDragBox.getStyleClass().add("chart-divider-drag-box");
+        dividerDragBox.setMinHeight(6);
+        dividerDragBox.setMaxHeight(6);
+        dividerDragBox.setPrefHeight(6);
+
         divider.getStyleClass().add("chart-divider");
-        divider.setMinHeight(4);
-        divider.setMaxHeight(4);
-        divider.setPrefHeight(4);
+        divider.setMinHeight(3);
+        divider.setMaxHeight(3);
+        divider.setPrefHeight(3);
+        divider.getChildren().add(dividerDragBox);
+
 
         GridPane.setHgrow(divider, Priority.ALWAYS);
         GridPane.setColumnSpan(divider, 2);
 
-        dragDistance = new NodeDragDistance(divider);
+        dragDistance = new NodeDragDistance(dividerDragBox);
         dragDistance.dragDistanceYProperty().subscribe(this::onDragDistanceYChange);
-        dragDistance.draggingProperty().subscribe(d -> divider.pseudoClassStateChanged(DRAGGING_PSEUDO_CLASS, d));
+        dragDistance.draggingProperty().subscribe(
+                d -> dividerDragBox.pseudoClassStateChanged(DRAGGING_PSEUDO_CLASS, d));
     }
 
     private void onDragDistanceYChange(Number o, Number n) {
