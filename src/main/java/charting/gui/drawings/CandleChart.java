@@ -94,7 +94,7 @@ public class CandleChart implements TimelineDrawing {
         strings.add(new ChartLegendString("   H: ", high, color));
         strings.add(new ChartLegendString("   L: ", low, color));
         strings.add(new ChartLegendString("   C: ", close, color));
-        strings.add(new ChartLegendString("    Δ: ",
+        strings.add(new ChartLegendString("    Diff: ",
                 (getAbsDiff(i) + " " + getPctDiff(i)).stripTrailing(), color));
 
         return strings;
