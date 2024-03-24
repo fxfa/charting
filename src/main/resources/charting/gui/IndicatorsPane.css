@@ -1,6 +1,4 @@
 .indicators-pane {
-    -fx-pref-width: 600px;
-    -fx-pref-height: 500px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 12, 0.5, 0, 3);
     -fx-background-color: #0e1429ef;
     -fx-background-radius: 6px;
@@ -8,10 +6,6 @@
     -fx-border-width: 1 1 1 1;
     -fx-border-color: #ffffff1a;
     -fx-border-radius: 6px;
-}
-
-.indicators-pane-header {
-    -fx-padding: 15px;
 }
 
 .indicators-pane:dragging .indicators-pane-header:hover {
@@ -23,7 +17,8 @@
 }
 
 .indicators-pane-title {
-    -fx-font-size: 1.8em;
+    -fx-font-size: 1.6em;
+    -fx-padding: 15px;
     -fx-font-weight: bold;
     -fx-text-fill: white;
 }
@@ -41,7 +36,6 @@
 }
 
 .indicators-pane-list .list-cell {
-    -fx-font-size: 1.3em;
     -fx-background-color: transparent;
 }
 
@@ -87,8 +81,8 @@
 }
 
 .indicators-pane-list-entry {
-    -fx-font-size: 1em;
-    -fx-padding: 16px;
+    -fx-font-size: 1.3em;
+    -fx-padding: 13px;
     -fx-text-fill: #f5f5f5f5;
     -fx-selection-highlight-color: #ffffff20;
 }

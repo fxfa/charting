@@ -2,5 +2,5 @@
 
 <?import charting.gui.superchart.ValueAxis?>
 <fx:root type="ValueAxis" xmlns:fx="http://javafx.com/fxml" styleClass="value-axis"
-         minWidth="72" prefWidth="72" prefHeight="800">
+         minWidth="64" prefWidth="64" prefHeight="800">
 </fx:root>

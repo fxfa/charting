@@ -5,54 +5,63 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.SVGPath?>
-<StackPane xmlns:fx="http://javafx.com/fxml" prefWidth="1200" prefHeight="800">
+<StackPane xmlns:fx="http://javafx.com/fxml" prefWidth="1100" prefHeight="700">
     <HBox fx:id="mainPane">
         <VBox fx:id="objectToolbar" styleClass="object-toolbar">
-            <Button fx:id="trendLineButton" text="Trend line" minWidth="74" minHeight="74"
-                    prefWidth="74" prefHeight="74" alignment="CENTER"
+            <Button fx:id="trendLineButton" text="Trend line" minWidth="58" minHeight="58"
+                    prefWidth="58" prefHeight="58" alignment="CENTER"
                     styleClass="object-toolbar-button, object-toolbar-trend-line-button"
                     onAction="#onTrendLineButtonAction">
                 <graphic>
-                    <SVGPath styleClass="object-toolbar-button-icon" stroke="#cccccc" fill="transparent" strokeWidth="2"
-                             content="M 4 0 a 4 4 90 0 1 4 4 a 4 4 90 0 1 -4 4 a 4 4 90 0 1 -4 -4 a 4 4 90 0 1 4 -4 z
-                             M 6.828 6.828 L 33.172 33.172 z M 36 32 a 4 4 90 0 1 4 4 a 4 4 90 0 1 -4 4
-                             a 4 4 90 0 1 -4 -4 a 4 4 90 0 1 4 -4 z"/>
+                    <SVGPath styleClass="object-toolbar-button-icon" stroke="#cccccc" fill="transparent" strokeWidth="1.5"
+                             content="M 3.2432 0 a 3.2432 3.2432 90 0 1 3.2432 3.2432 a 3.2432 3.2432 90 0 1 -3.2432
+                             3.2432 a 3.2432 3.2432 90 0 1 -3.2432 -3.2432 a 3.2432 3.2432 90 0 1 3.2432 -3.2432 z M
+                             5.5362 5.5362 L 26.8962 26.8962 z M 29.1892 25.9459 a 3.2432 3.2432 90 0 1 3.2432 3.2432 a
+                             3.2432 3.2432 90 0 1 -3.2432 3.2432 a 3.2432 3.2432 90 0 1 -3.2432 -3.2432 a 3.2432 3.2432
+                             90 0 1 3.2432 -3.2432 z"/>
                 </graphic>
             </Button>
 
-            <Button fx:id="horizontalLineButton" text="Horizontal line" minWidth="74" minHeight="74"
-                    prefWidth="74" prefHeight="74" alignment="CENTER"
+            <Button fx:id="horizontalLineButton" text="Horizontal line" minWidth="58" minHeight="58"
+                    prefWidth="58" prefHeight="58" alignment="CENTER"
                     styleClass="object-toolbar-button, object-toolbar-horizontal-line-button"
                     onAction="#onHorizontalLineButtonAction">
                 <graphic>
-                    <SVGPath styleClass="object-toolbar-button-icon" stroke="#cccccc" fill="transparent" strokeWidth="2"
-                             content="M 0 20 L 16 20 z M 20 16 a 4 4 90 0 1 4 4 a 4 4 90 0 1 -4 4
-                             a 4 4 90 0 1 -4 -4 a 4 4 90 0 1 4 -4 z M 24 20 L 40 20 z"/>
+                    <SVGPath styleClass="object-toolbar-button-icon" stroke="#cccccc" fill="transparent" strokeWidth="1.5"
+                             content="M 0 16.2162 L 12.973 16.2162 z M 16.2162 12.973 a 3.2432 3.2432 90 0 1 3.2432
+                             3.2432 a 3.2432 3.2432 90 0 1 -3.2432 3.2432 a 3.2432 3.2432 90 0 1 -3.2432 -3.2432 a
+                             3.2432 3.2432 90 0 1 3.2432 -3.2432 z M 19.4595 16.2162 L 32.4324 16.2162 z"/>
                 </graphic>
             </Button>
-            <Button fx:id="measureAreaButton" text="Measure area" minWidth="74" minHeight="74"
-                    prefWidth="74" prefHeight="74" alignment="CENTER"
+            <Button fx:id="measureAreaButton" text="Measure area" minWidth="58" minHeight="58"
+                    prefWidth="58" prefHeight="58" alignment="CENTER"
                     styleClass="object-toolbar-button, object-toolbar-measure-area-button"
                     onAction="#onMeasureAreaButtonAction">
                 <graphic>
-                    <SVGPath styleClass="object-toolbar-button-icon" stroke="#cccccc" fill="transparent" strokeWidth="2"
-                             content="M 0 0 L 40 0 L 40 40 L 0 40 z M 4 20 L 36 20 z m 32 0 l -5 -5 z l -5 5 z
-                             M 20 36 l 0 -32 z m 0 -32 l -5 5 z l 5 5"/>
+                    <SVGPath styleClass="object-toolbar-button-icon" stroke="#cccccc" fill="transparent" strokeWidth="1.5"
+                             content="M 0 0 L 32.4324 0 L 32.4324 32.4324 L 0 32.4324 z M 3.2432 16.2162 L 29.1892
+                             16.2162 z m 25.9459 0 l -4.0541 -4.0541 z l -4.0541 4.0541 z M 16.2162 29.1892 l 0
+                             -25.9459 z m 0 -25.9459 l -4.0541 4.0541 z l 4.0541 4.0541"/>
                 </graphic>
             </Button>
-            <Button fx:id="indicatorButton" text="Indicators" minWidth="74" minHeight="74"
-                    prefWidth="74" prefHeight="74" alignment="CENTER"
+            <Button fx:id="indicatorButton" text="Indicators" minWidth="58" minHeight="58"
+                    prefWidth="58" prefHeight="58" alignment="CENTER"
                     styleClass="object-toolbar-button, object-toolbar-indicator-button"
                     onAction="#onIndicatorButtonAction">
                 <graphic>
-                    <SVGPath styleClass="object-toolbar-button-icon" stroke="#cccccc" fill="transparent" strokeWidth="2"
-                             content="M 5 12 L 15 7 L 25 12 L 35 0 M 31 20 h 8 c 0.55 0 1 0.45 1 1 V 39
-                             C 40 39.55 39.55 40 39 40 h -8 c -0.55 0 -1 -0.45 -1 -1 V 21 c 0 -0.55 0.45 -1 1 -1 z
-                             M 21 32 h 8 c 0.55 0 1 0.45 1 1 v 6 C 30 39.55 29.55 40 29 40 h -8
-                             C 20.45 40 20 39.55 20 39 v -6 c 0 -0.55 0.45 -1 1 -1 z M 11 27 h 8 c 0.55 0 1 0.45 1 1
-                             V 39 C 20 39.55 19.55 40 19 40 h -8 c -0.55 0 -1 -0.45 -1 -1 V 28 c 0 -0.55 0.45 -1 1 -1 z
-                             M 1 32 H 9 c 0.55 0 1 0.45 1 1 v 6 C 10 39.55 9.55 40 9 40 H 9 C 0.45 40 0 39.55 0 39 v -6
-                             c 0 -0.55 0.45 -1 1 -1 z"/>
+                    <SVGPath styleClass="object-toolbar-button-icon" stroke="#cccccc" fill="transparent" strokeWidth="1.5"
+                             content="M 4.0541 9.7297 L 12.1622 5.6757 L 20.2703 9.7297 L 28.3784 0 M 25.1351 16.2162 h
+                             6.4865 c 0.4459 0 0.8108 0.3649 0.8108 0.8108 V 31.6216 C 32.4324 32.0676 32.0676 32.4324
+                             31.6216 32.4324 h -6.4865 c -0.4459 0 -0.8108 -0.3649 -0.8108 -0.8108 V 17.027 c 0 -0.4459
+                             0.3649 -0.8108 0.8108 -0.8108 z M 17.027 25.9459 h 6.4865 c 0.4459 0 0.8108 0.3649 0.8108
+                             0.8108 v 4.8649 C 24.3243 32.0676 23.9595 32.4324 23.5135 32.4324 h -6.4865 C 16.5811
+                             32.4324 16.2162 32.0676 16.2162 31.6216 v -4.8649 c 0 -0.4459 0.3649 -0.8108 0.8108
+                             -0.8108 z M 8.9189 21.8919 h 6.4865 c 0.4459 0 0.8108 0.3649 0.8108 0.8108 V 31.6216 C
+                             16.2162 32.0676 15.8514 32.4324 15.4054 32.4324 h -6.4865 c -0.4459 0 -0.8108 -0.3649
+                             -0.8108 -0.8108 V 22.7027 c 0 -0.4459 0.3649 -0.8108 0.8108 -0.8108 z M 0.8108 25.9459 H
+                             7.2973 c 0.4459 0 0.8108 0.3649 0.8108 0.8108 v 4.8649 C 8.1081 32.0676 7.7432 32.4324
+                             7.2973 32.4324 H 7.2973 C 0.3649 32.4324 0 32.0676 0 31.6216 v -4.8649 c 0 -0.4459 0.3649
+                             -0.8108 0.8108 -0.8108 z"/>
                 </graphic>
             </Button>
         </VBox>

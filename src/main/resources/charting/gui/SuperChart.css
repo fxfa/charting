@@ -45,18 +45,18 @@
 .chart-legend-title {
     -fx-background-color: #050b1cb8;
     -fx-font-weight: bold;
-    -fx-font-size: 1.65em;
-    -fx-padding: 5px;
+    -fx-font-size: 1.6em;
+    -fx-padding: 3px;
     -fx-text-fill: white;
 }
 
 .chart-legend-entry {
     -fx-background-color: #050b1cb8;
-    -fx-padding: 5px;
+    -fx-padding: 3px;
 }
 
 .chart-legend-entry .text {
-    -fx-font-size: 1.35em;
+    -fx-font-size: 1.3em;
 }
 
 .chart-legend-entry .description {
