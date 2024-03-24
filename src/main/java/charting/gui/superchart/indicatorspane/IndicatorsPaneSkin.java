@@ -96,13 +96,6 @@ public class IndicatorsPaneSkin extends SkinBase<IndicatorsPane> {
         }
     }
 
-    @FXML
-    private void onCloseButtonClick() {
-        if (getSkinnable() != null && getSkinnable().getCloseButtonActionHandler() != null) {
-            getSkinnable().getCloseButtonActionHandler().run();
-        }
-    }
-
     private void onIndicatorCellClick(IndicatorListCellGraphic graphic) {
         graphic.playSelectionAnimation();
 

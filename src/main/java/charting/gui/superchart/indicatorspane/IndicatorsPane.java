@@ -16,7 +16,6 @@ public class IndicatorsPane extends Control {
     private final ObservableList<Indicator> indicators = FXCollections.observableArrayList();
 
     private final ObjectProperty<Consumer<Indicator>> indicatorSelectionHandler = new SimpleObjectProperty<>();
-    private final ObjectProperty<Runnable> closeButtonActionHandler = new SimpleObjectProperty<>();
 
     public IndicatorsPane() {
         getStyleClass().add("indicators-pane");
@@ -39,21 +38,6 @@ public class IndicatorsPane extends Control {
 
     public void setIndicatorSelectionHandler(Consumer<Indicator> indicatorSelectionHandler) {
         this.indicatorSelectionHandler.set(indicatorSelectionHandler);
-    }
-
-    public Runnable getCloseButtonActionHandler() {
-        return closeButtonActionHandler.get();
-    }
-
-    /**
-     * This handler will be invoked whenever the panes close button is clicked.
-     */
-    public ObjectProperty<Runnable> closeButtonActionHandlerProperty() {
-        return closeButtonActionHandler;
-    }
-
-    public void setCloseButtonActionHandler(Runnable closeButtonActionHandler) {
-        this.closeButtonActionHandler.set(closeButtonActionHandler);
     }
 
     @Override

@@ -38,15 +38,11 @@ public class SuperChartSkin extends SkinBase<SuperChart> {
     private Region chartAxisCorner;
 
     @FXML
-    private VBox objectToolbar;
-    @FXML
     private Button trendLineButton;
     @FXML
     private Button horizontalLineButton;
     @FXML
     private Button measureAreaButton;
-    @FXML
-    private Button indicatorButton;
 
     @FXML
     private IndicatorsPane indicatorsPane;
@@ -72,7 +68,6 @@ public class SuperChartSkin extends SkinBase<SuperChart> {
         timeAxis.axisProperty().bindBidirectional(superChart.timeAxisProperty());
         timeAxis.timeAxisPosConverterProperty().bind(superChart.timeAxisPosConverterProperty());
 
-        indicatorsPane.setCloseButtonActionHandler(this::hideIndicatorsPane);
         indicatorsPane.setIndicatorSelectionHandler(this::onIndicatorSelection);
         indicatorsPane.layoutBoundsProperty().subscribe(this::positionIndicatorsPane);
 
